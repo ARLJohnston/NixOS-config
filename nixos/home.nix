@@ -43,6 +43,7 @@
       keybindings = {
         "${cfg.modifier}+q" = "kill";
         "${cfg.modifier}+d" = "exec wofi --show drun";
+        "${cfg.modifier}+w" = "exec firefox";
         "${cfg.modifier}+Return" = "exec foot";
 
 	# Focusing
@@ -98,9 +99,9 @@
 	  "XF86MonBrightnessDown" = "exec brightnessctl set 2.5%-";
 	  "XF86MonBrightnessUp" = "exec brightnessctl set 2.5%+";
 
-	  "XF86AudioRaiseVolume" = "exec 'pactl set-sink-volume @DEFAULT_SINK@ +1%'";
-	  "XF86AudioLowerVolume" = "exec 'pactl set-sink-volume @DEFAULT_SINK@ -1%'";
-	  "XF86AudioMute" = "exec 'pactl set-sink-mute @DEFAULT_SINK@ toggle'";
+	  "XF86AudioRaiseVolume" = "exec 'pamixer --increase 5'";
+	  "XF86AudioLowerVolume" = "exec 'pamixer --decrease 5'";
+	  "XF86AudioMute" = "exec 'pamixer --toggle-mute'";
       };
     };
   };
@@ -113,6 +114,29 @@
       };
       mouse = {
         hide-when-typing = "yes";
+      };
+      colors = {
+        alpha = 0.8;
+
+	foreground="cdd6f4";
+        background="1e1e2e";
+        regular0="222222";
+        regular1="cc9393";
+        regular2="7f9f7f";
+        regular3="d0bf8f";
+        regular4="6ca0a3";
+        regular5="dc8cc3";
+        regular6="93e0e3";
+        regular7="dcdccc";
+
+        bright0="666666";
+        bright1="dca3a3";
+        bright2="bfebbf";
+        bright3="f0dfaf";
+        bright4="8cd0d3";
+        bright5="fcace3";
+        bright6="b3ffff";
+        bright7="ffffff";
       };
     };
   };
