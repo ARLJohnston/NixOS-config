@@ -40,6 +40,25 @@
 	  bg = "~/wallpaper.png fill";
 	};
       };
+      input = {
+          "1:1:AT_Translated_Set_2_keyboard" = {
+            xkb_layout = "gb";
+            xkb_options = "ctrl:nocaps";
+          };
+
+          "1739:0:Synaptics_TM3381-002" = {
+            pointer_accel = "0.7";
+            tap = "enabled";
+            dwt = "enabled";
+            natural_scroll = "enabled";
+          };
+        };
+      #input = {
+      #  keyboard = {
+      #    xkb_layout = "gb";
+      #    xkb_options = "caps:ctrl_modifier";
+      #  };
+      #};
       keybindings = {
         "${cfg.modifier}+q" = "kill";
         "${cfg.modifier}+d" = "exec wofi --show drun";
