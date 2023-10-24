@@ -11,8 +11,22 @@
       ./hardware-configuration.nix
       ./desktop.nix
       ./audio.nix
-      ./emacs.nix
+      #./emacs.nix
     ];
+
+  time.timeZone = "Europe/Dublin";
+  console.keyMap = "uk";
+
+environment.sessionVariables = {
+    XKB_DEFAULT_LAYOUT = "gb";
+    XKB_DEFAULT_OPTIONS =
+      "ctrl:nocaps";
+    LANG = lib.mkForce "en_GB.UTF-8";
+  };
+
+  i18n = {
+    defaultLocale = "en_GB.UTF-8";
+  };
 
   nix = {
     gc = {
@@ -26,6 +40,19 @@
   };
 
   services.auto-cpufreq.enable = true;
+  services.auto-cpufreq.settings = {
+    battery = {
+       governor = "powersave";
+       turbo = "never";
+    };
+    charger = {
+       governor = "performance";
+       turbo = "auto";
+    };
+  };
+
+  services.thermald.enable = true;
+
   services.tlp = {
     enable = true;
     settings = {
@@ -75,25 +102,29 @@
     curl
     git
     home-manager
+    networkmanagerapplet
   ];
+  
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [
+      # Add additional package names here
+      "discord"
+    ];
 
   users.users.alistair = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" "audio" ];
+    extraGroups = [ "wheel" "video" "networkmanager" ];
     packages = with pkgs; [
       firefox
       neovim
       zotero
       thunderbird
+      teams-for-linux
+      discord
       gh
     ];
   };
 
-  time.timeZone = "Europe/Dublin";
-  console.keyMap = "uk";
-  i18n = {
-    defaultLocale = "en_GB.UTF-8";
-  };
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It's perfectly fine and recommended to leave
