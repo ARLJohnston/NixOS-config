@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ inputs, config, lib, pkgs, ... }:
+{ inputs, config, lib, pkgs, callPackage, ... }:
 
 {
   imports =
@@ -11,18 +11,25 @@
       ./hardware-configuration.nix
       ./desktop.nix
       ./audio.nix
-      #./emacs.nix
+      ./power.nix
     ];
 
   time.timeZone = "Europe/Dublin";
   console.keyMap = "uk";
 
-environment.sessionVariables = {
+  environment.sessionVariables = {
     XKB_DEFAULT_LAYOUT = "gb";
-    XKB_DEFAULT_OPTIONS =
-      "ctrl:nocaps";
+    XKB_DEFAULT_OPTIONS = "ctrl:nocaps";
     LANG = lib.mkForce "en_GB.UTF-8";
   };
+
+  #Lock-screen and hinge
+  security.pam.services.swaylock = {};
+  services.logind = {
+    extraConfig = "HandlePowerKey=suspend";
+    lidSwitch = "suspend";
+  };
+  powerManagement.powerUpCommands = "sudo rmmod atkbd; sudo modprobe atkbd reset=1";
 
   i18n = {
     defaultLocale = "en_GB.UTF-8";
@@ -39,52 +46,19 @@ environment.sessionVariables = {
     };
   };
 
-  services.auto-cpufreq.enable = true;
-  services.auto-cpufreq.settings = {
-    battery = {
-       governor = "powersave";
-       turbo = "never";
-    };
-    charger = {
-       governor = "performance";
-       turbo = "auto";
-    };
-  };
-
-  services.thermald.enable = true;
-
-  services.tlp = {
-    enable = true;
-    settings = {
-      CPU_SCALING_GOVERNOR_ON_AC = "performance";
-      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-
-      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "powersave";
-
-      CPU_MIN_PERF_ON_AC = 0;
-      CPU_MAX_PERF_ON_AC = 75;
-      CPU_MIN_PERF_ON_BAT = 0;
-      CPU_MAX_PERF_ON_BAT = 20;
-
-      PLATFORM_PROFILE_ON_BAT = "low-power";
-      START_CHARGE_THRESHOLD_BAT0 = 70;
-      STOP_CHARGE_THRESHOLD_BAT0 = 70;
-      START_CHARGE_THRESHOLD_BAT1 = 70;
-      STOP_CHARGE_THRESHOLD_BAT1 = 70;
-      RESTORE_THRESHOLDS_ON_BAT = 1;
-
-      DEVICES_TO_DISABLE_ON_STARTUP = "bluetooth wwan";
-    };
-  };
-
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
     efiInstallAsRemovable = true;
     device = "/dev/sda";
+    splashImage = "/home/alistair/Downloads/lock.png";
+    extraConfig = ''
+      acpi_backlight=vendor
+      acpi_osi=Linux
+    '';
   };
   boot.supportedFilesystems = [ "zfs" ];
+  boot.kernelParams = [ "psmouse.synaptics_intertouch=0" ];
 
   services.zfs = {
     autoSnapshot.enable = true;
@@ -100,20 +74,33 @@ environment.sessionVariables = {
   environment.systemPackages = with pkgs; [
     nix-prefetch
     curl
+    acpi
     git
     home-manager
     networkmanagerapplet
+    docker
+    nodejs-slim
+    rnix-lsp
   ];
+
+  virtualisation.docker.enable = true;
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true;
+  };
   
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       # Add additional package names here
       "discord"
+			"spotify"
+      "jetbrains.idea-ultimate"
+      "idea-ultimate"
     ];
 
   users.users.alistair = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" "networkmanager" ];
+    extraGroups = [ "wheel" "video" "networkmanager" "docker" ];
     packages = with pkgs; [
       firefox
       neovim
@@ -122,9 +109,23 @@ environment.sessionVariables = {
       teams-for-linux
       discord
       gh
+      feh
+      act
+      spotify
+      jetbrains.idea-ultimate
+      jetbrains.jdk
     ];
   };
 
+  services.emacs.package = pkgs.emacs-unstable;
+  services.emacs.enable = true;
+
+  nixpkgs.overlays = [
+    (import (builtins.fetchTarball {
+      url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+      sha256 = "12dy44h67mps72mgznvcd0w245hd4hbscxqgcm3vbvd766w9cvgl";
+    }))
+  ];
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It's perfectly fine and recommended to leave
@@ -132,5 +133,4 @@ environment.sessionVariables = {
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "23.11"; # Did you read the comment?
-
 }
