@@ -26,7 +26,6 @@
 
       modules = [
         ./nixos/configuration.nix
-        ./nixos/sddm_theme.nix
       ];
     };
   };
