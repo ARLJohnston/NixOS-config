@@ -72,6 +72,7 @@
   };
 
   environment.systemPackages = with pkgs; [
+    linuxKernel.packages.linux_xanmod_latest.tp_smapi
     nix-prefetch
     curl
     acpi
