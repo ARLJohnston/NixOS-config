@@ -33,7 +33,7 @@
         bright2 = "${colors.base0B}"; 
         bright3 = "${colors.base0A}"; 
         bright4 = "${colors.base0D}"; 
-        bright5 = "${colors.base0F}"; 
+        bright5 = "${colors.base0E}"; 
         bright6 = "${colors.base0C}"; 
         bright7 = "${colors.base07}"; 
       };
