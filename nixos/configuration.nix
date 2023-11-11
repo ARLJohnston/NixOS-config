@@ -36,10 +36,6 @@
   };
 
   nix = {
-    gc = {
-      automatic = true;
-      options = "--max-freed 1G --delete-older-than 10d";
-    };
     settings = {
       allowed-users = [ "alistair" ];
       experimental-features = [ "nix-command" "flakes" ];
@@ -114,9 +110,12 @@
       spotify
       jetbrains.idea-ultimate
       jetbrains.jdk
+      graphviz-nox
     ];
   };
 
+  hardware.opengl.enable = true;
+  
   services.emacs.package = pkgs.emacs-unstable;
   services.emacs.enable = true;
 
@@ -126,6 +125,15 @@
       sha256 = "12dy44h67mps72mgznvcd0w245hd4hbscxqgcm3vbvd766w9cvgl";
     }))
   ];
+
+  # Binary Cache for Haskell.nix
+  nix.settings.trusted-public-keys = [
+    "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  ];
+  nix.settings.substituters = [
+    "https://cache.iog.io"
+  ];
+
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It's perfectly fine and recommended to leave

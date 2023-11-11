@@ -1,25 +1,35 @@
-{ config, pkgs, lib, ...}:
+{ config, pkgs, inputs, lib, ...}:
 {
   home.username = "alistair";
   home.homeDirectory = "/home/alistair";
 
   home.stateVersion = "22.11";
 
+  imports = [
+    inputs.nix-colors.homeManagerModules.default
+  ];
+
+  colorScheme = inputs.nix-colors.colorschemes.gruvbox-dark-medium;
+
   home.packages = with pkgs; [
     wofi
     eww-wayland
     swaybg
     swayidle
+    lsd
+    zoxide
     fd
     grim
     slurp
     wl-clipboard
+    ollama
   ];
 
   home.file = {
   };
 
   home.sessionVariables = {
+    FZF_DEFAULT_COMMAND = "find ~ -mindepth 1 -maxdepth 1";
   };
 
   programs.home-manager.enable = true;
@@ -43,6 +53,9 @@
 	        bg = "~/wallpaper.png fill";
         };
       };
+      #bars = [{
+      #  command = "waybar";
+      #}];
       input = {
           "1:1:AT_Translated_Set_2_keyboard" = {
             xkb_layout = "gb";
@@ -51,7 +64,7 @@
         };
       # Always execute foot client on startup
       startup = [
-        { command = "exec --no-startup-id i3-msg 'workspace:scratchpad; footclient'" ; always = true; }
+        { command = "exec --no-startup-id sway-msg 'workspace:scratchpad; footclient'" ; always = true; }
       ];
       keybindings = {
         "${cfg.modifier}+q" = "kill";
@@ -116,8 +129,8 @@
         "${cfg.modifier}+Shift+minus" = "move scratchpad";
         "${cfg.modifier}+minus" = "scratchpad show";
 
-	      "XF86MonBrightnessDown" = "exec brightnessctl set 2.5%-";
-	      "XF86MonBrightnessUp" = "exec brightnessctl set 2.5%+";
+	      "XF86MonBrightnessDown" = "exec brightnessctl set 1-";
+	      "XF86MonBrightnessUp" = "exec brightnessctl set 1+";
 
 	      "XF86AudioRaiseVolume" = "exec 'pamixer --increase 5'";
 	      "XF86AudioLowerVolume" = "exec 'pamixer --decrease 5'";
@@ -135,7 +148,11 @@
     };
   };
 
-  programs.foot = {
+  programs.foot =
+    let
+      inherit (config.colorScheme) colors;
+    in
+    {
     enable = true;
     settings = {
       main = {
@@ -147,25 +164,26 @@
       colors = {
         alpha = 0.8;
 
-	      foreground = "cdd6f4";
-        background = "1e1e2e";
-        regular0   = "222222";
-        regular1   = "cc9393";
-        regular2   = "7f9f7f";
-        regular3   = "d0bf8f";
-        regular4   = "6ca0a3";
-        regular5   = "dc8cc3";
-        regular6   = "93e0e3";
-        regular7   = "dcdccc";
+        foreground = "${colors.base05}"; 
+        background = "${colors.base00}"; 
 
-        bright0    = "666666";
-        bright1    = "dca3a3";
-        bright2    = "bfebbf";
-        bright3    = "f0dfaf";
-        bright4    = "8cd0d3";
-        bright5    = "fcace3";
-        bright6    = "b3ffff";
-        bright7    = "ffffff";
+        regular0 = "${colors.base03}"; 
+        regular1 = "${colors.base08}"; 
+        regular2 = "${colors.base0B}"; 
+        regular3 = "${colors.base05}"; 
+        regular4 = "${colors.base0D}"; 
+        regular5 = "${colors.base0F}"; 
+        regular6 = "${colors.base0C}"; 
+        regular7 = "${colors.base06}"; 
+
+        bright0 = "${colors.base04}"; 
+        bright1 = "${colors.base08}"; 
+        bright2 = "${colors.base0B}"; 
+        bright3 = "${colors.base0A}"; 
+        bright4 = "${colors.base0D}"; 
+        bright5 = "${colors.base0F}"; 
+        bright6 = "${colors.base0C}"; 
+        bright7 = "${colors.base07}"; 
       };
     };
   };
@@ -183,23 +201,27 @@
     };
 	};
 
-  programs.fzf = {
+  programs.fzf =
+    let
+      inherit (config.colorScheme) colors;
+    in
+    {
     enable = true;
-    defaultCommand = "fd .$HOME -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//";
+    #defaultCommand = "fd ~ -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^$HOME/,,";
 
     colors = {
-      fg      = "cdd6f4";
-      bg      = "1e1e2e";
-      hl      = "666666";
-      "fg+"   = "cc9393";
-      "bg+"   = "222222";
-      "hl+"   = "bfebbf";
-      info    = "dcdccc";
-      prompt  = "b3ffff";
-      pointer = "f0dfaf";
-      marker  = "ffffff";
-      spinner = "ffffff";
-      header  = "666666";
+      fg      = "${colors.base04}";
+      "fg+"   = "${colors.base06}";
+      bg      = "${colors.base00}";
+      "bg+"   = "${colors.base01}";
+      hl      = "${colors.base0D}";
+      "hl+"   = "${colors.base0D}";
+      spinner = "${colors.base0C}";
+      header  = "${colors.base0D}";
+      info    = "${colors.base05}";
+      pointer = "${colors.base0C}";
+      marker  = "${colors.base0C}";
+      prompt  = "${colors.base05}";
     };
   };
 }
