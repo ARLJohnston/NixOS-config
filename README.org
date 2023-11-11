@@ -1,0 +1,39 @@
+* ARLJohnston NixOS configuration
+
+** Directories
+#+BEGIN_SRC sh :results output
+tree
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+.
+├── background.png
+├── disko-config.nix
+├── flake.lock
+├── flake.nix
+├── nixos
+│   ├── audio.nix
+│   ├── configuration.nix
+│   ├── desktop.nix
+│   ├── hardware-configuration.nix
+│   ├── home_modules
+│   │   ├── foot.nix
+│   │   ├── fzf.nix
+│   │   ├── starship.nix
+│   │   └── sway.nix
+│   ├── home.nix
+│   └── power.nix
+└── README.org
+
+3 directories, 16 files
+#+end_example
+
+** Flake
+Flake.nix currently defines one host (thinkpad) and one user (alistair).
+
+** Configuration
+This is the main entrypoint for they system after the flake.
+
+** Home
+Home manager configuration.
