@@ -1,12 +1,10 @@
 { pkgs, config, ... }:
+let
+  inherit (config.colorScheme) colors;
+in
 {
-  programs.fzf =
-    let
-      inherit (config.colorScheme) colors;
-    in
-    {
+  programs.fzf = {
     enable = true;
-    #defaultCommand = "fd ~ -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^$HOME/,,";
 
     colors = {
       fg      = "${colors.base04}";

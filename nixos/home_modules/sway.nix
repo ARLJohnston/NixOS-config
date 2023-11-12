@@ -1,15 +1,14 @@
 { pkgs, config, ... }:
-{
-  wayland.windowManager.sway = 
-    let
-      cfg = config.wayland.windowManager.sway.config;
+let
+  cfg = config.wayland.windowManager.sway.config;
 
-      left = "h";
-      down = "j";
-      up = "k";
-      right = "l";
-    in
-    {
+  left = "h";
+  down = "j";
+  up = "k";
+  right = "l";
+in
+{
+  wayland.windowManager.sway = {
     enable = true;
     config = rec {
       modifier = "Mod4";

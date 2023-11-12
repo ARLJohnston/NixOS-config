@@ -1,10 +1,9 @@
 { pkgs, config, ... }:
+let
+  inherit (config.colorScheme) colors;
+in
 {
-  programs.foot =
-    let
-      inherit (config.colorScheme) colors;
-    in
-    {
+  programs.foot = {
     enable = true;
     settings = {
       main = {
@@ -24,7 +23,7 @@
         regular2 = "${colors.base0B}"; 
         regular3 = "${colors.base05}"; 
         regular4 = "${colors.base0D}"; 
-        regular5 = "${colors.base0F}"; 
+        regular5 = "${colors.base08}"; 
         regular6 = "${colors.base0C}"; 
         regular7 = "${colors.base06}"; 
 
@@ -32,7 +31,7 @@
         bright1 = "${colors.base08}"; 
         bright2 = "${colors.base0B}"; 
         bright3 = "${colors.base0A}"; 
-        bright4 = "${colors.base0D}"; 
+        bright4 = "${colors.base09}"; 
         bright5 = "${colors.base0E}"; 
         bright6 = "${colors.base0C}"; 
         bright7 = "${colors.base07}"; 
