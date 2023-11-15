@@ -89,7 +89,6 @@
     builtins.elem (lib.getName pkg) [
       # Add additional package names here
       "discord"
-			"spotify"
       "jetbrains.idea-ultimate"
       "idea-ultimate"
     ];
@@ -107,10 +106,11 @@
       gh
       feh
       act
-      spotify
+      graphviz-nox
       jetbrains.idea-ultimate
       jetbrains.jdk
-      graphviz-nox
+      stack
+      ghcid
     ];
   };
 
