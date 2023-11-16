@@ -1,5 +1,6 @@
 { pkgs, config, ... }:
 let
+  inherit (config.colorScheme) colors;
   cfg = config.wayland.windowManager.sway.config;
 
   left = "h";
@@ -94,13 +95,50 @@ in
         "${cfg.modifier}+Shift+minus" = "move scratchpad";
         "${cfg.modifier}+minus" = "scratchpad show";
 
-	      "XF86MonBrightnessDown" = "exec brightnessctl set 1-";
-	      "XF86MonBrightnessUp" = "exec brightnessctl set 1+";
+	      "XF86MonBrightnessDown" = "exec brightnessctl set 5%-";
+	      "XF86MonBrightnessUp" = "exec brightnessctl set 5%+";
+
+	      "${cfg.modifier}+XF86MonBrightnessDown" = "exec brightnessctl set 1%-";
+	      "${cfg.modifier}+XF86MonBrightnessUp" = "exec brightnessctl set 1%+";
 
 	      "XF86AudioRaiseVolume" = "exec 'pamixer --increase 5'";
 	      "XF86AudioLowerVolume" = "exec 'pamixer --decrease 5'";
 	      "XF86AudioMute" = "exec 'pamixer --toggle-mute'";
       };
+    };
+  };
+
+  programs.swaylock = {
+    enable = true;
+    settings = {
+      font = "MonoLisa Nerd Font";
+      image = "~/lock.png";
+      scaling = "fill";
+
+      bs-hl-color = "#${colors.base08}";
+      key-hl-color = "#${colors.base0C}";
+
+      inside-color = "#${colors.base01}";
+      inside-clear-color = "#${colors.base01}";
+      inside-ver-color = "#${colors.base01}";
+      inside-wrong-color = "#${colors.base01}";
+
+      line-color = "#${colors.base00}";
+      line-ver-color = "#${colors.base00}";
+      line-clear-color = "#${colors.base00}";
+      line-wrong-color = "#${colors.base00}";
+
+      ring-color = "#${colors.base03}";
+      ring-clear-color = "#${colors.base0C}";
+      ring-ver-color = "#${colors.base0C}";
+      ring-wrong-color = "#${colors.base08}";
+
+      separator-color = "00000000";
+
+      text-color = "#${colors.base06}";
+      text-clear-color = "#${colors.base05}";
+      text-ver-color = "#${colors.base04}";
+      text-wrong-color = "#${colors.base08}";
     };
   };
 }

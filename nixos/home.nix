@@ -25,6 +25,7 @@
     slurp
     swaybg
     swayidle
+    tree
     wl-clipboard
     wofi
     zoxide
@@ -34,18 +35,8 @@
   };
 
   home.sessionVariables = {
-    FZF_DEFAULT_COMMAND = "find ~ -mindepth 1 -maxdepth 1";
   };
 
   programs.home-manager.enable = true;
 
-
-  programs.swaylock = {
-    enable = true;
-    settings = {
-      font = "MonoLisa Nerd Font";
-      image = "~/lock.png";
-      scaling = "fill";
-    };
-  };
 }
