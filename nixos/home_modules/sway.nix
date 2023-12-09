@@ -9,6 +9,16 @@ let
   right = "l";
 in
 {
+  home.packages = with pkgs; [
+    eww-wayland
+    grim
+    slurp
+    swaybg
+    swayidle
+    wl-clipboard
+    wofi
+  ];
+
   wayland.windowManager.sway = {
     enable = true;
     config = rec {
@@ -19,9 +29,18 @@ in
 	        bg = "~/wallpaper.png fill";
         };
       };
-      #bars = [{
-      #  command = "waybar";
-      #}];
+      bars = [{
+        statusCommand = "i3status-rs $HOME/.config/i3status-rust/config-bottom.toml";
+
+        mode = "hide";
+
+        #Appearance
+        fonts = [ "MonoLisa Nerd Font 10" ];
+        colors = {
+          background = "#${colors.base00}";
+          statusline = "#${colors.base05}";
+        };
+      }];
       input = {
           "1:1:AT_Translated_Set_2_keyboard" = {
             xkb_layout = "gb";
@@ -87,6 +106,7 @@ in
         "${cfg.modifier}+Shift+Tab" = "workspace prev";
 
         "${cfg.modifier}+space" = "floating toggle";
+        "${cfg.modifier}+Shift+space" = "move position center";
 
 	      "${cfg.modifier}+f" = "fullscreen";
         "Print" = "exec 'grim -g \"\$(slurp)\" - | wl-copy -t image/png'";
@@ -104,6 +124,58 @@ in
 	      "XF86AudioRaiseVolume" = "exec 'pamixer --increase 5'";
 	      "XF86AudioLowerVolume" = "exec 'pamixer --decrease 5'";
 	      "XF86AudioMute" = "exec 'pamixer --toggle-mute'";
+      };
+    };
+  };
+
+  programs.i3status-rust = {
+    enable = true;
+    bars = {
+      bottom = {
+
+        blocks = [
+          {
+            block = "memory";
+            format = " $icon $mem_used_percents ";
+            format_alt = " $icon $swap_used_percents ";
+          }
+          {
+            block = "cpu";
+            interval = 1;
+            format = "$utilization $frequency ";
+          }
+          {
+            block = "sound";
+          }
+          {
+            block = "battery";
+            device = "BAT0";
+            format = "INT $percentage $time ";
+          }
+          {
+            block = "battery";
+            device = "BAT1";
+            format = "EXT $percentage $time ";
+          }
+          {
+            block = "net";
+            format = " $icon $ssid $signal_strength $ip ↓$speed_down ↑$speed_up ";
+            interval = 2;
+          }
+          {
+            block = "time";
+            interval = 1;
+            format = " $timestamp.datetime(f:'%F %T') ";
+          }
+        ];
+        settings = {
+          theme.overrides = {
+            background = "#${colors.base00}";
+            statusline = "#${colors.base05}";
+            
+          };
+        };
+        icons = "none";
       };
     };
   };

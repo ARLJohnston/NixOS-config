@@ -17,11 +17,8 @@
   colorScheme = inputs.nix-colors.colorschemes.zenburn;
 
   home.packages = with pkgs; [
-    eww-wayland
-    fd
     grim
     lsd
-    ollama
     slurp
     swaybg
     swayidle
