@@ -1,0 +1,16 @@
+#Ignore everything
+*
+
+!.gitignore
+!*.nix
+!*.lock
+!*.org
+!LICENSE
+!.github
+!.github/*
+!*.yaml
+!secrets/*
+
+!nixos/*.nix
+!nixos/home_modules/*.nix
+
