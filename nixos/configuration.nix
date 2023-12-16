@@ -8,11 +8,20 @@
   imports =
     [
       inputs.home-manager.nixosModules.home-manager
+      inputs.sops-nix.nixosModules.sops
+
       ./hardware-configuration.nix
       ./desktop.nix
       ./audio.nix
       ./power.nix
     ];
+
+  #sops.defaultSopsFile = ./secrets/secrets.yaml;
+  #sops.defaultSopsFormat = "yaml";
+  #sops.age.keyFile = "/home/alistair/.config/sops/age/keys.txt";
+
+  #sops.secrets.example-key = { };
+  #sops.secrets."myservice/my_subdir/my_secret" = { };
 
   time.timeZone = "Europe/Dublin";
   console.keyMap = "uk";
@@ -47,8 +56,9 @@
     efiSupport = true;
     efiInstallAsRemovable = true;
     device = "/dev/sda";
-    splashImage = "/home/alistair/Downloads/lock.png";
     extraConfig = ''
+      quiet
+      splash
       acpi_backlight=vendor
       acpi_osi=Linux
     '';
@@ -74,10 +84,18 @@
     git
     home-manager
     networkmanagerapplet
-    docker
     nodejs-slim
     rnix-lsp
+    sops
+    vlc
+    texliveFull
+    haskell-language-server
+    ghc
+    #imageMagick
   ];
+
+  virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.guest.enable = true;
 
   virtualisation.docker.enable = true;
   virtualisation.docker.rootless = {
@@ -87,51 +105,41 @@
   
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
-      # Add additional package names here
       "discord"
-      "jetbrains.idea-ultimate"
-      "idea-ultimate"
     ];
 
   users.users.alistair = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" "networkmanager" "docker" ];
+    extraGroups = [ "wheel" "video" "networkmanager" "docker" "vboxusers"];
     packages = with pkgs; [
       firefox
-      neovim
       zotero
       thunderbird
       teams-for-linux
       discord
       gh
       feh
-      act
       graphviz-nox
-      jetbrains.idea-ultimate
-      jetbrains.jdk
-      stack
-      ghcid
     ];
   };
 
+  services.xserver.excludePackages = with pkgs; [
+    xterm
+  ];
+
   hardware.opengl.enable = true;
   
-  services.emacs.package = pkgs.emacs-unstable;
-  services.emacs.enable = true;
+  services.emacs = {
+    package = pkgs.emacs-unstable;
+    enable = true;
+    defaultEditor = true;
+  };
 
   nixpkgs.overlays = [
     (import (builtins.fetchTarball {
       url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
-      sha256 = "12dy44h67mps72mgznvcd0w245hd4hbscxqgcm3vbvd766w9cvgl";
+      sha256 = "0125wz02lmbf7myx46p5d4k6mx2avkgjgbdf5hs3m1xzvs5268hd";
     }))
-  ];
-
-  # Binary Cache for Haskell.nix
-  nix.settings.trusted-public-keys = [
-    "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-  ];
-  nix.settings.substituters = [
-    "https://cache.iog.io"
   ];
 
   # This value determines the NixOS release from which the default

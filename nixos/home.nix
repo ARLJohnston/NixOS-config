@@ -14,17 +14,11 @@
     ./home_modules/sway.nix
   ];
 
-  colorScheme = inputs.nix-colors.colorschemes.zenburn;
+  colorScheme = inputs.nix-colors.colorschemes.nord;
 
   home.packages = with pkgs; [
-    grim
     lsd
-    slurp
-    swaybg
-    swayidle
     tree
-    wl-clipboard
-    wofi
     zoxide
   ];
 

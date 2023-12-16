@@ -10,8 +10,8 @@ let
 in
 {
   home.packages = with pkgs; [
-    eww-wayland
     grim
+    mako
     slurp
     swaybg
     swayidle
@@ -21,9 +21,16 @@ in
 
   wayland.windowManager.sway = {
     enable = true;
-    config = rec {
+    extraConfig = ''
+      workspace number 1
+      seat * hide_cursor when-typing enable
+    '';
+    swaynag = {
+      enable = true;
+    };
+    config = {
       modifier = "Mod4";
-      terminal = "foot";
+      terminal = "footclient";
       output = {
         eDP-1 = {
 	        bg = "~/wallpaper.png fill";
@@ -31,14 +38,16 @@ in
       };
       bars = [{
         statusCommand = "i3status-rs $HOME/.config/i3status-rust/config-bottom.toml";
-
         mode = "hide";
+        extraConfig = "height 16";
 
         #Appearance
         fonts = [ "MonoLisa Nerd Font 10" ];
         colors = {
           background = "#${colors.base00}";
           statusline = "#${colors.base05}";
+          focusedWorkspace = { background = "#${colors.base0F}"; border = "#${colors.base07}"; text = "#${colors.base00}"; };
+          inactiveWorkspace = { background = "#${colors.base00}"; border = "#${colors.base00}"; text = "#${colors.base05}"; };
         };
       }];
       input = {
@@ -47,18 +56,20 @@ in
             xkb_options = "ctrl:nocaps";
           };
         };
-      # Always execute foot client on startup
-      startup = [
-        { command = "exec --no-startup-id sway-msg 'workspace:scratchpad; footclient'" ; always = true; }
-      ];
+      colors = import ./colors.nix {inherit colors;};
+
       keybindings = {
         "${cfg.modifier}+q" = "kill";
         "${cfg.modifier}+d" = "exec wofi --show drun";
         "${cfg.modifier}+w" = "exec firefox";
         "${cfg.modifier}+Control+L" = "exec swaylock";
-        "${cfg.modifier}+Return" = "exec foot";
+        "${cfg.modifier}+Return" = "exec footclient";
 
-	# Focusing
+        "${cfg.modifier}+e" = "layout toggle split";
+        "${cfg.modifier}+s" = "layout tabbed";
+        #"${cfg.modifier}+g" = "layout stacking";
+
+	      # Focusing
         "${cfg.modifier}+${cfg.left}" = "focus left";
         "${cfg.modifier}+${cfg.down}" = "focus down";
         "${cfg.modifier}+${cfg.up}" = "focus up";
@@ -111,7 +122,7 @@ in
 	      "${cfg.modifier}+f" = "fullscreen";
         "Print" = "exec 'grim -g \"\$(slurp)\" - | wl-copy -t image/png'";
 
-	# Scratchpad
+	      # Scratchpad
         "${cfg.modifier}+Shift+minus" = "move scratchpad";
         "${cfg.modifier}+minus" = "scratchpad show";
 
@@ -168,24 +179,30 @@ in
             format = " $timestamp.datetime(f:'%F %T') ";
           }
         ];
-        settings = {
-          theme.overrides = {
-            background = "#${colors.base00}";
-            statusline = "#${colors.base05}";
-            
-          };
-        };
+        #settings = {
+        #  theme.overrides = {
+        #    background = "#${colors.base00}";
+        #    statusline = "#${colors.base05}";
+        #    
+        #  };
+        #};
+        theme = "nord-dark";
         icons = "none";
       };
     };
   };
 
   programs.swaylock = {
+    package = pkgs.swaylock-effects;
     enable = true;
     settings = {
       font = "MonoLisa Nerd Font";
       image = "~/lock.png";
       scaling = "fill";
+      clock = true;
+      fade-in = 0.2;
+      indicator = true;
+      indicator-radius = 65;
 
       bs-hl-color = "#${colors.base08}";
       key-hl-color = "#${colors.base0C}";

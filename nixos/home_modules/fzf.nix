@@ -20,5 +20,7 @@ in
       marker  = "${colors.base0C}";
       prompt  = "${colors.base05}";
     };
+
+    tmux.enableShellIntegration = config.programs.tmux.enable;
   };
 }
