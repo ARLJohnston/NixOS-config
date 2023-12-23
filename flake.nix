@@ -13,6 +13,11 @@
       url = "github:misterio77/nix-colors";
     };
 
+    spicetify-nix = {
+      url = "github:the-argus/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     sops-nix.url = "github:Mic92/sops-nix";
   };
 

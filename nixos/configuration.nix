@@ -101,14 +101,6 @@
     setSocketVariable = true;
   };
 
-  nixpkgs.config.packageOverrides = pkgs: {
-    nur = import (builtins.fetchTarball {
-      url = "https://github.com/nix-community/NUR/archive/master.tar.gz";
-      sha256 = "01bschx89f9c67652s6z6wjfgcmnm0wxg06hvshwvfbi3x7jsvxg";
-    }) {
-      inherit pkgs;
-    };
-  };
   
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
@@ -122,6 +114,7 @@
     isNormalUser = true;
     extraGroups = [ "wheel" "video" "networkmanager" "docker" "vboxusers"];
     packages = with pkgs; [
+      betterdiscordctl
       discord
       feh
       firefox
@@ -146,6 +139,13 @@
     enable = true;
     defaultEditor = true;
   };
+
+  nixpkgs.overlays = [
+    (import (builtins.fetchTarball {
+      url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+      sha256 = "0125wz02lmbf7myx46p5d4k6mx2avkgjgbdf5hs3m1xzvs5268hd";
+    }))
+  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
