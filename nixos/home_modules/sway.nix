@@ -11,12 +11,11 @@ in
 {
   home.packages = with pkgs; [
     grim
-    mako
     slurp
     swaybg
     swayidle
-    wl-clipboard
     wofi
+    wl-clipboard
   ];
 
   wayland.windowManager.sway = {
@@ -69,6 +68,7 @@ in
         "${cfg.modifier}+s" = "layout tabbed";
         #"${cfg.modifier}+g" = "layout stacking";
 
+        "${cfg.modifier}+x" = "exec ~/.config/rofi/powermenu.sh";
 	      # Focusing
         "${cfg.modifier}+${cfg.left}" = "focus left";
         "${cfg.modifier}+${cfg.down}" = "focus down";
@@ -200,7 +200,6 @@ in
       image = "~/lock.png";
       scaling = "fill";
       clock = true;
-      fade-in = 0.2;
       indicator = true;
       indicator-radius = 65;
 
@@ -229,5 +228,78 @@ in
       text-ver-color = "#${colors.base04}";
       text-wrong-color = "#${colors.base08}";
     };
+  };
+
+  programs.wofi = {
+    enable = true;
+    style = ''
+      * {
+	      font-family: "MonoLisa Nerd Font", monospace;
+      }
+      
+      window {
+	      background-color: #${colors.base07};
+      }
+      
+      #input {
+	      margin: 5px;
+	      border-radius: 0px;
+	      border: none;
+	      background-color: #${colors.base03};
+	      color: white;
+      }
+      
+      #inner-box {
+	      background-color: #${colors.base01};
+      }
+      
+      #outer-box {
+	      margin: 2px;
+	      padding: 10px;
+	      background-color: #${colors.base00};
+      }
+      
+      #scroll {
+	      margin: 5px;
+      }
+      
+      #text {
+	      padding: 4px;
+	      color: #${colors.base05};
+      }
+      
+      #entry:nth-child(even){
+	      background-color: #${colors.base02};
+      }
+      
+      #entry:selected {
+	      background-color: #${colors.base00};
+      }
+      
+      #text:selected {
+        color: #${colors.base0B};
+	      background: transparent;
+      }
+    '';
+
+    settings = {
+      font = "MonoLisa Nerd Font 10";
+      case-sensitive = false;
+      #fuzzy-match = true;
+      show-icons = true;
+      icon-theme = "Papirus";
+      icon-size = 16;
+    };
+  };
+
+  services.mako = {
+    enable = true;
+    defaultTimeout = 2500;
+    font = "MonoLisa Nerd Font 10";
+
+    backgroundColor = "#${colors.base00}";
+    borderColor = "#${colors.base0D}";
+    textColor = "#${colors.base0B}";
+    progressColor = "over #${colors.base02}";
   };
 }

@@ -3,7 +3,6 @@
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
 { inputs, config, lib, pkgs, callPackage, ... }:
-
 {
   imports =
     [
@@ -91,7 +90,6 @@
     texliveFull
     haskell-language-server
     ghc
-    #imageMagick
   ];
 
   virtualisation.virtualbox.host.enable = true;
@@ -102,24 +100,38 @@
     enable = true;
     setSocketVariable = true;
   };
+
+  nixpkgs.config.packageOverrides = pkgs: {
+    nur = import (builtins.fetchTarball {
+      url = "https://github.com/nix-community/NUR/archive/master.tar.gz";
+      sha256 = "01bschx89f9c67652s6z6wjfgcmnm0wxg06hvshwvfbi3x7jsvxg";
+    }) {
+      inherit pkgs;
+    };
+  };
   
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       "discord"
+      "lutris"
+      "steam"
     ];
 
+  nixpkgs.config.allowUnfree = true;
   users.users.alistair = {
     isNormalUser = true;
     extraGroups = [ "wheel" "video" "networkmanager" "docker" "vboxusers"];
     packages = with pkgs; [
-      firefox
-      zotero
-      thunderbird
-      teams-for-linux
       discord
-      gh
       feh
+      firefox
+      gh
       graphviz-nox
+      lutris
+      teams-for-linux
+      thunderbird
+      wineWowPackages.waylandFull
+      zotero
     ];
   };
 
@@ -134,13 +146,6 @@
     enable = true;
     defaultEditor = true;
   };
-
-  nixpkgs.overlays = [
-    (import (builtins.fetchTarball {
-      url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
-      sha256 = "0125wz02lmbf7myx46p5d4k6mx2avkgjgbdf5hs3m1xzvs5268hd";
-    }))
-  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

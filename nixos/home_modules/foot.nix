@@ -39,4 +39,17 @@ in
       };
     };
   };
+
+  #programs.tmux = {
+  #  enable = true;
+  #  keyMode = "vi";
+  #  #shortcut = "w";
+  #  prefix = "C-Space";
+  #  shortcut = "Space";
+  #  terminal = "tmux-256color";
+  #  plugins = with pkgs.tmuxPlugins; [
+  #    nord
+  #    tmux-fzf
+  #  ];
+  #};
 }

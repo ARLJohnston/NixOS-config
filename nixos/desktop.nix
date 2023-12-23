@@ -1,12 +1,6 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    foot
-    wofi
-    mako
-    grim
-    slurp
-    wl-clipboard
     brightnessctl
     libsForQt5.qt5.qtquickcontrols2
     libsForQt5.qt5.qtgraphicaleffects

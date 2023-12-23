@@ -41,7 +41,10 @@
       inherit pkgs;
       extraSpecialArgs = { inherit inputs system; };
 
-      modules = [./nixos/home.nix];
+      modules =
+        [
+          ./nixos/home.nix
+        ];
     };
   };
 

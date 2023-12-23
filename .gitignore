@@ -11,6 +11,8 @@
 !*.yaml
 !secrets/*
 
+!nixos
+!nixos/home_modules
 !nixos/*.nix
 !nixos/home_modules/*.nix
 
