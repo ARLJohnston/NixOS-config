@@ -45,7 +45,7 @@
 
   nix = {
     settings = {
-      allowed-users = [ "alistair" ];
+      allowed-users = [ "@wheel" ];
       experimental-features = [ "nix-command" "flakes" ];
     };
   };
@@ -90,6 +90,7 @@
     texliveFull
     haskell-language-server
     ghc
+    zfs
   ];
 
   virtualisation.virtualbox.host.enable = true;
@@ -107,6 +108,7 @@
       "discord"
       "lutris"
       "steam"
+      "spotify"
     ];
 
   nixpkgs.config.allowUnfree = true;
@@ -119,7 +121,6 @@
       feh
       firefox
       gh
-      graphviz-nox
       lutris
       teams-for-linux
       thunderbird
