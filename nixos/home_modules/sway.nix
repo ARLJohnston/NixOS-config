@@ -296,10 +296,11 @@ in
     enable = true;
     defaultTimeout = 2500;
     font = "MonoLisa Nerd Font 10";
+    layer = "overlay";
 
-    backgroundColor = "#${colors.base00}";
+    backgroundColor = "#${colors.base02}";
     borderColor = "#${colors.base0D}";
-    textColor = "#${colors.base0B}";
-    progressColor = "over #${colors.base02}";
+    textColor = "#FFFFFF";
+    progressColor = "over #${colors.base08}";
   };
 }

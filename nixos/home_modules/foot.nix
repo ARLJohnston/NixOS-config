@@ -68,6 +68,7 @@ in
       bind q kill-pane
 
       set-option -g set-titles on
+      set-option -g default-command bash
     '';
 # May need to run this to get changes to take effect
 # > tmux kill-server
