@@ -21,12 +21,13 @@ in
     ./home_modules/fzf.nix
     ./home_modules/starship.nix
     ./home_modules/sway.nix
+   # ./home_modules/dwl.nix
 
     spicetify-nix.homeManagerModule
       {
          programs.spicetify = {
            enable = true;
-           theme = spicePkgs.themes.Nord;
+           theme = spicePkgs.themes.Blossom;
 
            enabledExtensions = with spicePkgs.extensions; [
              fullAppDisplay
@@ -45,6 +46,8 @@ in
     lsd
     tree
     zoxide
+    nordzy-cursor-theme
+    nordic
   ];
 
   home.file = {
@@ -53,6 +56,62 @@ in
   home.sessionVariables = {
   };
 
+  home.pointerCursor = {
+    name = "Nordzy-cursors";
+    #package = pkgs.gnome.adwaita-icon-theme;
+    package = pkgs.nordzy-cursor-theme;
+    size = 24;
+    x11 = {
+        enable = true;
+        defaultCursor = "Adwaita";
+      };
+  };
+
+  gtk = {
+    enable = true;
+    font.name = "MonoLisa Nerd Font 10";
+    theme = {
+      name = "Nordic";
+      package = pkgs.nordic;
+    };
+  };
+  qt = {
+    enable = true;
+    
+    platformTheme = "qtct";
+    
+    style.name = "kvantum";
+  };
+  
+  xdg.configFile = {
+    "Kvantum/kvantum.kvconfig".text = ''
+        [General]
+            theme=GraphiteNordDark
+              '';
+    
+    "Kvantum/GraphiteNord".source = "${pkgs.graphite-kde-theme}/share/Kvantum/GraphiteNord";
+  };
+
+
   programs.home-manager.enable = true;
+
+  dwl = {
+    enable = true;
+    patches = [
+      #./dwl-patches/focusdirection.patch
+      #./dwl-patches/attachbottom.patch
+      #./dwl-patches/monfig.patch
+      #./dwl-patches/point.patch
+      #./dwl-patches/restoreTiling.patch
+      #./dwl-patches/toggleKbLayout.patch
+      #./dwl-patches/cursor_warp.patch
+      #./dwl-patches/output-power-management.patch
+      #./dwl-patches/autostart.patch
+      ./dwl-patches/swallow.patch
+    ];
+    cmd = {
+      terminal = "${pkgs.foot}/bin/foot";
+    };
+  };
 
 }

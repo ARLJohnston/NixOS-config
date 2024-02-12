@@ -55,6 +55,7 @@
     efiSupport = true;
     efiInstallAsRemovable = true;
     device = "/dev/sda";
+    splashImage = "/home/alistair/grub.png";
     extraConfig = ''
       quiet
       splash
@@ -84,48 +85,72 @@
     home-manager
     networkmanagerapplet
     nodejs-slim
+    obs-studio
     rnix-lsp
     sops
     vlc
     texliveFull
     haskell-language-server
-    ghc
     zfs
   ];
 
   virtualisation.virtualbox.host.enable = true;
   virtualisation.virtualbox.guest.enable = true;
 
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
-  };
-
+  #virtualisation.docker.enable = true;
+  #virtualisation.docker.rootless = {
+  #  enable = true;
+  #  setSocketVariable = true;
+  #};
   
+  nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       "discord"
-      "lutris"
-      "steam"
       "spotify"
+      "steam-run"
     ];
 
-  nixpkgs.config.allowUnfree = true;
   users.users.alistair = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" "networkmanager" "docker" "vboxusers"];
+    extraGroups = [
+      "wheel"
+      "video"
+      "networkmanager"
+      # "docker"
+      "vboxusers"
+    ];
     packages = with pkgs; [
+      steam-run
       betterdiscordctl
+      whatsapp-for-linux
+      calibre
       discord
       feh
       firefox
       gh
-      lutris
+      elixir_1_16
+      gnumake
+      jdk17
+      erlang
+      spring-boot-cli
+      maven
+      networkmanager-openvpn
+      openconnect
+      bemenu
+      ghc
+      cargo
+      rustc
+      vpnc
+      onagre
+      networkmanager-openconnect
       teams-for-linux
       thunderbird
-      wineWowPackages.waylandFull
+      unzip
       zotero
+      desmume
+      ffmpeg_5-full
+      dwl
     ];
   };
 
@@ -146,6 +171,12 @@
       url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
       sha256 = "0125wz02lmbf7myx46p5d4k6mx2avkgjgbdf5hs3m1xzvs5268hd";
     }))
+    #(
+    #  final: prev:
+    #    {
+    #      dwl = prev.dwl.override { conf = ./dwl-config.h; };
+    #    }
+    #)
   ];
 
   # This value determines the NixOS release from which the default

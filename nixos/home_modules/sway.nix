@@ -50,12 +50,28 @@ in
         };
       }];
       input = {
-          "1:1:AT_Translated_Set_2_keyboard" = {
+          "*" = {
             xkb_layout = "gb";
             xkb_options = "ctrl:nocaps";
           };
+          #"1:1:AT_Translated_Set_2_keyboard" = {
+          #  xkb_layout = "gb";
+          #  xkb_options = "ctrl:nocaps";
+          #};
+          "1739:0:Synaptics_TM3381-002" = {
+            pointer_accel = "0.7";
+          };
         };
       colors = import ./colors.nix {inherit colors;};
+
+      assigns = {
+        "10" = [
+          {title = "Spotify";}
+        ];
+        "9" = [
+          {title = "Discord";}
+        ];
+      };
 
       keybindings = {
         "${cfg.modifier}+q" = "kill";
@@ -161,12 +177,12 @@ in
           {
             block = "battery";
             device = "BAT0";
-            format = "INT $percentage $time ";
+            format = "INT $percentage $time $status";
           }
           {
             block = "battery";
             device = "BAT1";
-            format = "EXT $percentage $time ";
+            format = "EXT $percentage $time $status";
           }
           {
             block = "net";
@@ -299,7 +315,7 @@ in
     layer = "overlay";
 
     backgroundColor = "#${colors.base02}";
-    borderColor = "#${colors.base0D}";
+    borderColor = "#${colors.base02}";
     textColor = "#FFFFFF";
     progressColor = "over #${colors.base08}";
   };
