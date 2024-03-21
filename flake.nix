@@ -17,8 +17,6 @@
       url = "github:the-argus/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    sops-nix.url = "github:Mic92/sops-nix";
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs:
@@ -34,7 +32,6 @@
   nixosConfigurations = {
     thinkpad = nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs system; };
-
       modules = [
         ./nixos/configuration.nix
       ];
@@ -45,7 +42,6 @@
     alistair = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
       extraSpecialArgs = { inherit inputs system; };
-
       modules =
         [
           ./nixos/home.nix

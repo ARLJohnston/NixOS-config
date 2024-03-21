@@ -4,6 +4,30 @@ let
   spicePkgs = spicetify-nix.packages.${pkgs.system}.default;
 in
 {
+  colorScheme = {
+    slug = "solarized-gruvbox-dark";
+    name =  "Solarized Gruvbox Dark";
+    author = "https://ethanschoonover.com/solarized/";
+    palette = {
+      base00 = "002b36";
+      base01 = "073642";
+      base02 = "586e75";
+      base03 = "657b83";
+      base04 = "839496";
+      base05 = "93a1a1";
+      base06 = "eee8d5";
+      base07 = "fdf6e3";
+      base08 = "859900";
+      base09 = "b58900";
+      base0A = "dc322f";
+      base0B = "cb4b16";
+      base0C = "2aa198";
+      base0D = "268bd2";
+      base0E = "6c71c4";
+      base0F = "d33682";
+    };
+  };
+
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       "spotify"
@@ -20,8 +44,7 @@ in
     ./home_modules/foot.nix
     ./home_modules/fzf.nix
     ./home_modules/starship.nix
-    ./home_modules/sway.nix
-   # ./home_modules/dwl.nix
+
 
     spicetify-nix.homeManagerModule
       {
@@ -40,14 +63,12 @@ in
       }
   ];
 
-  colorScheme = inputs.nix-colors.colorschemes.nord;
+
 
   home.packages = with pkgs; [
     lsd
     tree
     zoxide
-    nordzy-cursor-theme
-    nordic
   ];
 
   home.file = {
@@ -56,62 +77,5 @@ in
   home.sessionVariables = {
   };
 
-  home.pointerCursor = {
-    name = "Nordzy-cursors";
-    #package = pkgs.gnome.adwaita-icon-theme;
-    package = pkgs.nordzy-cursor-theme;
-    size = 24;
-    x11 = {
-        enable = true;
-        defaultCursor = "Adwaita";
-      };
-  };
-
-  gtk = {
-    enable = true;
-    font.name = "MonoLisa Nerd Font 10";
-    theme = {
-      name = "Nordic";
-      package = pkgs.nordic;
-    };
-  };
-  qt = {
-    enable = true;
-    
-    platformTheme = "qtct";
-    
-    style.name = "kvantum";
-  };
-  
-  xdg.configFile = {
-    "Kvantum/kvantum.kvconfig".text = ''
-        [General]
-            theme=GraphiteNordDark
-              '';
-    
-    "Kvantum/GraphiteNord".source = "${pkgs.graphite-kde-theme}/share/Kvantum/GraphiteNord";
-  };
-
-
   programs.home-manager.enable = true;
-
-  dwl = {
-    enable = true;
-    patches = [
-      #./dwl-patches/focusdirection.patch
-      #./dwl-patches/attachbottom.patch
-      #./dwl-patches/monfig.patch
-      #./dwl-patches/point.patch
-      #./dwl-patches/restoreTiling.patch
-      #./dwl-patches/toggleKbLayout.patch
-      #./dwl-patches/cursor_warp.patch
-      #./dwl-patches/output-power-management.patch
-      #./dwl-patches/autostart.patch
-      ./dwl-patches/swallow.patch
-    ];
-    cmd = {
-      terminal = "${pkgs.foot}/bin/foot";
-    };
-  };
-
 }

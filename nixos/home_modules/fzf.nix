@@ -1,24 +1,21 @@
-{ pkgs, config, ... }:
-let
-  inherit (config.colorScheme) colors;
-in
+{ pkgs, config, nix-colors, ... }:
 {
   programs.fzf = {
     enable = true;
 
     colors = {
-      fg      = "${colors.base04}";
-      "fg+"   = "${colors.base06}";
-      bg      = "${colors.base00}";
-      "bg+"   = "${colors.base01}";
-      hl      = "${colors.base0D}";
-      "hl+"   = "${colors.base0D}";
-      spinner = "${colors.base0C}";
-      header  = "${colors.base0D}";
-      info    = "${colors.base05}";
-      pointer = "${colors.base0C}";
-      marker  = "${colors.base0C}";
-      prompt  = "${colors.base05}";
+      fg      = "${config.colorScheme.palette.base04}";
+      "fg+"   = "${config.colorScheme.palette.base06}";
+      bg      = "${config.colorScheme.palette.base00}";
+      "bg+"   = "${config.colorScheme.palette.base01}";
+      hl      = "${config.colorScheme.palette.base0D}";
+      "hl+"   = "${config.colorScheme.palette.base0D}";
+      spinner = "${config.colorScheme.palette.base0C}";
+      header  = "${config.colorScheme.palette.base0D}";
+      info    = "${config.colorScheme.palette.base05}";
+      pointer = "${config.colorScheme.palette.base0C}";
+      marker  = "${config.colorScheme.palette.base0C}";
+      prompt  = "${config.colorScheme.palette.base05}";
     };
 
     tmux.enableShellIntegration = config.programs.tmux.enable;

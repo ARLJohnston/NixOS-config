@@ -1,19 +1,10 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
+    #eww
     brightnessctl
-    libsForQt5.qt5.qtquickcontrols2
-    libsForQt5.qt5.qtgraphicaleffects
-
-    (where-is-my-sddm-theme.override {
-      themeConfig.General = {
-        background = "/home/alistair/grub.png";
-        backgroundFill = "#434C5E";
-        backgroundMode = "none";
-        cursorColor = "#88C0D0";
-        passwordFontSize = 85;
-      };
-    })
+    river
+    river-bnf
   ];
 
   security.polkit.enable = true;
@@ -27,12 +18,11 @@
     enable = true;
     xkb.layout = "gb";
     displayManager ={
-      sddm = {
+      gdm = {
         enable = true;
-        wayland.enable = true;
-        theme = "where_is_my_sddm_theme";
       };
-      sessionPackages = [ pkgs.sway ];
+      sessionPackages = [ pkgs.river ];
     };
   };
+
 }

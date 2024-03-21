@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ inputs, config, lib, pkgs, callPackage, ... }:
+{ inputs, config, lib, pkgs, callPackage, env, ... }:
 {
   imports =
     [
@@ -10,8 +10,9 @@
       inputs.sops-nix.nixosModules.sops
 
       ./hardware-configuration.nix
-      ./desktop.nix
       ./audio.nix
+      ./desktop.nix
+      ./emacs.nix
       ./power.nix
     ];
 
@@ -78,38 +79,34 @@
   };
 
   environment.systemPackages = with pkgs; [
-    nix-prefetch
     curl
     acpi
     git
     home-manager
     networkmanagerapplet
-    nodejs-slim
-    obs-studio
-    rnix-lsp
-    sops
+    #sops
     vlc
-    texliveFull
-    haskell-language-server
     zfs
   ];
 
-  virtualisation.virtualbox.host.enable = true;
-  virtualisation.virtualbox.guest.enable = true;
+  #virtualisation.virtualbox.host.enable = true;
+  #virtualisation.virtualbox.guest.enable = true;
 
-  #virtualisation.docker.enable = true;
-  #virtualisation.docker.rootless = {
-  #  enable = true;
-  #  setSocketVariable = true;
-  #};
-  
-  nixpkgs.config.allowUnfree = true;
+  virtualisation.docker.enable = true;
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true;
+  };
+
+
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       "discord"
       "spotify"
-      "steam-run"
     ];
+   users.extraGroups.vboxusers.members = [ "alistair" ];
+
+   virtualisation.virtualbox.host.enableExtensionPack = true;
 
   users.users.alistair = {
     isNormalUser = true;
@@ -117,40 +114,28 @@
       "wheel"
       "video"
       "networkmanager"
-      # "docker"
-      "vboxusers"
+      "docker"
     ];
+
     packages = with pkgs; [
-      steam-run
       betterdiscordctl
       whatsapp-for-linux
-      calibre
       discord
       feh
       firefox
       gh
-      elixir_1_16
       gnumake
-      jdk17
-      erlang
-      spring-boot-cli
-      maven
-      networkmanager-openvpn
-      openconnect
-      bemenu
-      ghc
-      cargo
-      rustc
-      vpnc
-      onagre
-      networkmanager-openconnect
       teams-for-linux
       thunderbird
       unzip
-      zotero
-      desmume
       ffmpeg_5-full
-      dwl
+
+      #Programming languages
+      go
+      cargo
+      rustc
+      rustfmt
+      ghc
     ];
   };
 
@@ -159,25 +144,10 @@
   ];
 
   hardware.opengl.enable = true;
-  
-  services.emacs = {
-    package = pkgs.emacs-unstable;
-    enable = true;
-    defaultEditor = true;
-  };
 
-  nixpkgs.overlays = [
-    (import (builtins.fetchTarball {
-      url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
-      sha256 = "0125wz02lmbf7myx46p5d4k6mx2avkgjgbdf5hs3m1xzvs5268hd";
-    }))
-    #(
-    #  final: prev:
-    #    {
-    #      dwl = prev.dwl.override { conf = ./dwl-config.h; };
-    #    }
-    #)
-  ];
+  system.userActivationScripts.discord = "betterdiscordctl install";
+
+
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
