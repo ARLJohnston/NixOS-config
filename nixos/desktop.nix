@@ -1,10 +1,10 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    #eww
     brightnessctl
     river
     river-bnf
+    wofi
   ];
 
   security.polkit.enable = true;
@@ -24,5 +24,6 @@
       sessionPackages = [ pkgs.river ];
     };
   };
+
 
 }

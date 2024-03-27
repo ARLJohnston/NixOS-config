@@ -44,6 +44,7 @@ in
     ./home_modules/foot.nix
     ./home_modules/fzf.nix
     ./home_modules/starship.nix
+    ./home_modules/wofi.nix
 
 
     spicetify-nix.homeManagerModule
