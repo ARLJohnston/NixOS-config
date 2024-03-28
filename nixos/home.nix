@@ -45,6 +45,7 @@ in
     ./home_modules/fzf.nix
     ./home_modules/starship.nix
     ./home_modules/wofi.nix
+    ./home_modules/i3status_rust.nix
 
 
     spicetify-nix.homeManagerModule

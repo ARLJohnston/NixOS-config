@@ -1,5 +1,9 @@
 { pkgs, config, nix-colors, ... }:
 {
+  home.packages = with pkgs; [
+    wofi
+  ];
+
   programs.wofi = {
     enable = true;
     style = ''

@@ -97,7 +97,6 @@
     setSocketVariable = true;
   };
 
-
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       "discord"
@@ -127,13 +126,16 @@
       teams-for-linux
       thunderbird
       unzip
+      openconnect
       ffmpeg_5-full
 
       #Programming languages
       go
+
       cargo
       rustc
       rustfmt
+
       ghc
     ];
   };

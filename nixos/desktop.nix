@@ -2,8 +2,10 @@
 {
   environment.systemPackages = with pkgs; [
     brightnessctl
+    grim
+    i3bar-river
     river
-    river-bnf
+    slurp
     wofi
   ];
 
@@ -24,6 +26,4 @@
       sessionPackages = [ pkgs.river ];
     };
   };
-
-
 }
