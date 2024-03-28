@@ -34,13 +34,13 @@
   services.emacs = {
     package = pkgs.emacs-unstable;
     enable = true;
-    defaultEditor = true;
   };
+  environment.variables.EDITOR = "emacsclient  -a=emacs";
 
   nixpkgs.overlays = [
   (import (builtins.fetchTarball {
     url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
-    sha256 = "0i7z6nwhjzkk1i7r3bxksl4q7wgvhzj0c7aly165xh6l28z62pv7";
+    sha256 = "11x80s4jh06ibk390q8wgvvi614fapiswmbi6z9xy9d21pf7mw33";
   }))
 ];
 }
