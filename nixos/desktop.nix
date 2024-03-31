@@ -19,11 +19,17 @@
   services.xserver = {
     enable = true;
     xkb.layout = "gb";
-    displayManager ={
-      gdm = {
-        enable = true;
+    xkb.model = "thinkpad";
+  };
+
+  services.greetd = {
+    enable = true;
+    settings = rec {
+      initial_session = {
+        command = "${pkgs.river}/bin/river";
+        user = "alistair";
       };
-      sessionPackages = [ pkgs.river ];
+      default_session = initial_session;
     };
   };
 }
