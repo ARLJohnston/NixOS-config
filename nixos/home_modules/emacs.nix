@@ -1,4 +1,5 @@
-{pkgs, ...}:
+{ pkgs, ... }:
+{
 # let
 #     # https://github.com/nix-community/emacs-overlay#extra-library-functionality
 #     em = (emacsWithPackagesFromUsePackage {
@@ -17,8 +18,7 @@
 #       };
 #     });
 # in
-{
-  environment.systemPackages = with pkgs; [
+  home.packages = with pkgs; [
     #mu4e
     mu
     #lsp-servers
@@ -37,9 +37,17 @@
     #Org-preview
     texliveMedium
   ];
-  services.emacs.enable = true;
 
-  environment.variables.EDITOR = "emacsclient  -a=emacs";
+  programs.emacs = {
+    enable = true;
+    package = pkgs.emacs-nox;
+  };
+
+  services.emacs = {
+    enable = true;
+    package = pkgs.emacs-nox;
+  };
+
 
 #   nixpkgs.overlays = [
 #   (import (builtins.fetchTarball {

@@ -46,13 +46,15 @@ in
     ./home_modules/starship.nix
     ./home_modules/wofi.nix
     ./home_modules/i3status_rust.nix
+    ./home_modules/emacs.nix
 
 
     spicetify-nix.homeManagerModule
       {
          programs.spicetify = {
            enable = true;
-           theme = spicePkgs.themes.Blossom;
+           theme = spicePkgs.themes.Onepunch;
+           colorScheme = "gruvbox";
 
            enabledExtensions = with spicePkgs.extensions; [
              fullAppDisplay

@@ -3,6 +3,7 @@
   environment.systemPackages = with pkgs; [
     brightnessctl
     grim
+    wl-clipboard
     i3bar-river
     river
     slurp
