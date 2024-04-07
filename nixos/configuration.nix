@@ -11,7 +11,6 @@
       ./hardware-configuration.nix
       ./audio.nix
       ./desktop.nix
-      #./emacs.nix
       ./power.nix
     ];
 
@@ -145,7 +144,6 @@
   ];
 
   hardware.opengl.enable = true;
-  environment.variables.EDITOR = "emacsclient  -a=emacs";
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

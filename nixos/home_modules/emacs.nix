@@ -46,6 +46,7 @@
   services.emacs = {
     enable = true;
     package = pkgs.emacs-nox;
+    defaultEditor = true;
   };
 
 
