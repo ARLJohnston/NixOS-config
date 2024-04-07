@@ -1,23 +1,25 @@
 { pkgs, ... }:
+let
+  emacs = (pkgs.emacsWithPackagesFromUsePackage {
+    package = pkgs.emacs-pgtk;
+    config = "~/.emacs";
+    alwaysEnsure = true;
+
+    #extraEmacsPackages = epkgs: [
+    #	epkgs.use-package
+    #	epkgs.org
+    #	epkgs.magit
+    #	epkgs.go-mode
+    #	epkgs.lsp-mode
+    #	epkgs.yasnippet
+    #];
+
+    override = final: prev: {
+      NIX_CFLAGS_COMPILE = [ "-O3" "-march=native" ];
+    };
+  });
+in
 {
-# let
-#     # https://github.com/nix-community/emacs-overlay#extra-library-functionality
-#     em = (emacsWithPackagesFromUsePackage {
-#       config = ~/.emacs;
-#       defaultInitFile = true;
-#       package = pkgs.emacs-unstable;
-#       alwaysTangle = true;
-
-#       extraEmacsPackages = epkgs: [
-#         epkgs.lsp-docker
-#         nil
-#       ];
-
-#       override = final: prev: {
-#         NIX_CFLAGS_COMPILE = [ "-Ofast" "-march=native" ];
-#       };
-#     });
-# in
   home.packages = with pkgs; [
     #mu4e
     mu
@@ -40,20 +42,11 @@
 
   programs.emacs = {
     enable = true;
-    package = pkgs.emacs-nox;
+    package = emacs;
   };
 
   services.emacs = {
     enable = true;
-    package = pkgs.emacs-nox;
     defaultEditor = true;
   };
-
-
-#   nixpkgs.overlays = [
-#   (import (builtins.fetchTarball {
-#     url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
-#     sha256 = "11x80s4jh06ibk390q8wgvvi614fapiswmbi6z9xy9d21pf7mw33";
-#   }))
-# ];
 }

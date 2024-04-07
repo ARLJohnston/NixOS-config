@@ -4,34 +4,14 @@ let
   spicePkgs = spicetify-nix.packages.${pkgs.system}.default;
 in
 {
-  colorScheme = {
-    slug = "solarized-gruvbox-dark";
-    name =  "Solarized Gruvbox Dark";
-    author = "https://ethanschoonover.com/solarized/";
-    palette = {
-      base00 = "002b36";
-      base01 = "073642";
-      base02 = "586e75";
-      base03 = "657b83";
-      base04 = "839496";
-      base05 = "93a1a1";
-      base06 = "eee8d5";
-      base07 = "fdf6e3";
-      base08 = "859900";
-      base09 = "b58900";
-      base0A = "dc322f";
-      base0B = "cb4b16";
-      base0C = "2aa198";
-      base0D = "268bd2";
-      base0E = "6c71c4";
-      base0F = "d33682";
-    };
-  };
+  colorScheme = inputs.nix-colors.colorSchemes.everforest;
 
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       "spotify"
     ];
+
+  nixpkgs.overlays = [ (import inputs.emacs-overlay) ];
 
   home.username = "alistair";
   home.homeDirectory = "/home/alistair";

@@ -145,6 +145,19 @@
 
   hardware.opengl.enable = true;
 
+  nixpkgs.overlays = [ (import inputs.emacs-overlay) ];
+
+#  nixpkgs.overlays = [
+#    (import (builtins.fetchTarball {
+#      url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+#      sha256 = "11x80s4jh06ibk390q8wgvvi614fapiswmbi6z9xy9d21pf7mw33";
+#    }))
+#  ];
+  services.emacs = {
+    enable = true;
+    defaultEditor = true;
+  };
+
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It's perfectly fine and recommended to leave
