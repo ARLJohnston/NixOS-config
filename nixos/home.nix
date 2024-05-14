@@ -7,11 +7,9 @@ in
   colorScheme = inputs.nix-colors.colorSchemes.everforest;
 
   nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [
-      "spotify"
-    ];
-
-  nixpkgs.overlays = [ (import inputs.emacs-overlay) ];
+  builtins.elem (lib.getName pkg) [
+    "spotify"
+  ];
 
   home.username = "alistair";
   home.homeDirectory = "/home/alistair";
@@ -25,29 +23,43 @@ in
     ./home_modules/fzf.nix
     ./home_modules/starship.nix
     ./home_modules/wofi.nix
-    ./home_modules/i3status_rust.nix
-    ./home_modules/emacs.nix
-
+    ./emacs.nix
 
     spicetify-nix.homeManagerModule
-      {
-         programs.spicetify = {
-           enable = true;
-           theme = spicePkgs.themes.Onepunch;
-           colorScheme = "gruvbox";
+    {
+      programs.spicetify = {
+        enable = true;
+        theme = spicePkgs.themes.text;
+        colorScheme = "kanagawa";
 
-           enabledExtensions = with spicePkgs.extensions; [
-             fullAppDisplay
-             shuffle
-             adblock
-             hidePodcasts
-             keyboardShortcut
-           ];
-         };
-      }
+        enabledExtensions = with spicePkgs.extensions; [
+          fullAppDisplay
+          shuffle
+          adblock
+          hidePodcasts
+          keyboardShortcut
+        ];
+      };
+    }
   ];
 
+  programs.mu = {
+    enable = true;
+  };
 
+  services.mbsync = {
+    enable = true;
+  };
+  # https://miikanissi.com/blog/email-setup-with-mbsync-mu4e/
+
+  # programs = {
+  #   direnv  = {
+  #     enable = true;
+  #     enableBashIntegration = true;
+  #     nix-direnv.enable = true;
+  #   };
+  #   bash.enable = true;
+  # };
 
   home.packages = with pkgs; [
     lsd

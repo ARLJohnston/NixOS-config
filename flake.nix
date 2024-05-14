@@ -11,6 +11,7 @@
 
     emacs-overlay = {
       url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nix-colors = {
@@ -21,9 +22,10 @@
       url = "github:the-argus/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, emacs-overlay, ... }@inputs:
   let
     system = "x86_64-linux";
 

@@ -12,7 +12,6 @@
       ./audio.nix
       ./desktop.nix
       ./power.nix
-      #./emacs.nix
     ];
 
     #sops.defaultSopsFile = ./secrets/secrets.yaml;
