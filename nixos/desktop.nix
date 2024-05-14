@@ -4,10 +4,11 @@
     brightnessctl
     grim
     wl-clipboard
-    i3bar-river
     river
     slurp
     wofi
+    swaybg
+    swaylock
   ];
 
   security.polkit.enable = true;
