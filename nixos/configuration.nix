@@ -46,6 +46,7 @@
       settings = {
         allowed-users = [ "@wheel" ];
         experimental-features = [ "nix-command" "flakes" ];
+        auto-optimise-store = true;
       };
     };
 
@@ -140,6 +141,8 @@
         openconnect
         ffmpeg_5-full
         desmume
+        lutris-free
+        wineWowPackages.wayland
 
         #Programming languages
         erlang
@@ -152,12 +155,18 @@
         rustfmt
 
         ghc
+        calibre
+        (aspellWithDicts (dicts: with dicts; [ en en-computers en-science ]))
       ];
     };
 
     services.xserver.excludePackages = with pkgs; [
       xterm
     ];
+
+    services.devmon.enable = true;
+    services.gvfs.enable = true;
+    services.udisks2.enable = true;
 
     hardware.opengl.enable = true;
 

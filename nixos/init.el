@@ -23,6 +23,7 @@
   (general-auto-unbind-keys)
   :ensure t
   :demand t
+  :after evil
 )
 
 (use-package emacs
@@ -42,7 +43,7 @@
 	:init
 	(add-to-list 'custom-theme-load-path "~/.emacs.d/everforest-emacs")
 	(load-file "~/.emacs.d/everforest-emacs/everforest-hard-dark-theme.el")
-	(load-theme 'everforest-hard-dark t)
+	;;(load-theme 'everforest-hard-dark t)
 	(set-face-attribute 'default nil :font "Iosevka Comfy")
 
 	(tool-bar-mode -1)
@@ -66,8 +67,9 @@
 	("C-c /" . comment-or-uncomment-region)
 
   :general
-  (general-nmap
-    :prefix "SPC"
+  (general-define-key
+   :prefix "SPC"
+   :states '(normal visual)
 		"bk" 'kill-this-buffer
 		"bm" 'buffer-menu
     "r" 'recentf
@@ -75,6 +77,30 @@
   :diminish visual-line-mode
 )
 
+(use-package rand-theme
+  :config
+  (setq rand-theme-unwanted '(leuven tango adwaita light-blue tsdh-light dichromacy whiteboard))
+  (rand-theme)
+)
+
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  ;; (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+  ;;       doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  ;; (load-theme 'doom-one t)
+
+  ;; ;; Enable flashing mode-line on errors
+  ;; (doom-themes-visual-bell-config)
+  ;; ;; Enable custom neotree theme (all-the-icons must be installed!)
+  ;; (doom-themes-neotree-config)
+  ;; ;; or for treemacs users
+  ;; (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config)
+  )
 
 (use-package whitespace
   :init
@@ -108,12 +134,19 @@
 
 (use-package casual-dired
 	:straight (:type git :host github :repo "kickingvegas/casual-dired")
-  :config
-  (general-define-key
-    :prefix "SPC"
-    :keymaps 'dired-mode-map
-   "o" 'casual-dired-tmenu
-  )
+  :general
+  (general-define-key :keymaps 'dired-mode-map
+    :states '(normal)
+    "h" 'dired-up-directory
+    "l" 'dired-find-file
+    "o" 'dired-sort-toggle-or-edit
+    "C-o" 'casual-dired-tmenu
+    "v" 'dired-toggle-marks
+    "m" 'dired-mark
+    "u" 'dired-unmark
+    "U" 'dired-unmark-all-marks
+    "c" 'dired-create-directory
+    "q" 'kill-this-buffer)
 )
 
 (use-package bind-key
@@ -130,8 +163,9 @@
 	:init
 	(setq imenu-list-focus-after-activation t)
   :general
-  (general-nmap
+  (general-define-key
     :prefix "SPC"
+    :states '(normal visual)
 	"si" 'imenu-list-smart-toggle
   )
 )
@@ -167,7 +201,7 @@
   (corfu-auto-delay 0.2)
   (corfu-popupinfo-delay '(0.4 . 0.2))
   (corfu-echo-documentation t)
-  (ispell-alternate-dictionary "/run/current-system/sw/lib/aspell/en-common.rws")
+  (ispell-alternate-dictionary " /home/alistair/.local/state/nix/profiles/profile/lib/aspell/en-common.rws ")
   :hook ((after-init . global-corfu-mode)
 	  (global-corfu-mode . corfu-popupinfo-mode))
 	:diminish corfu-mode
@@ -183,9 +217,10 @@
 		 ("https://samoa.dcs.gla.ac.uk/events/rest/Feed/rss/123" research)
 		 ("https://xkcd.com/rss.xml" misc)))
   :general
-  (general-nmap
+  (general-define-key
     :prefix "SPC"
-   "e" 'elfeed
+    :states '(normal visual)
+    "e" 'elfeed
   )
 	:defer t
 )
@@ -212,8 +247,9 @@
   (add-to-list 'eglot-server-programs '(gleam-mode . ("gleam" "lsp")))
   (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
   :general
-  (general-nmap
+  (general-define-
     :prefix "SPC"
+    :states '(normal)
     :keymaps 'prog-mode-map
    "lr" 'eglot-rename
   )
@@ -247,7 +283,7 @@
 	:bind
 	("M-s" . yas-insert-snippet)
 	:custom
-	(yas-snippet-dirs '("~/.emacs.d/snippets"))
+	(yas-snippet-dirs '("~/config/emacs/snippets"))
 	:ensure t
 	:diminish yas-minor-mode
 	)
@@ -272,8 +308,9 @@
     (org-map-entries (lambda () (org-sort-entries nil ?o)) nil 'tree))
 
   :general
-  (general-nmap
+  (general-define-key
     :prefix "SPC"
+    :states '(normal visual)
     :keymaps 'org-mode-map
 		"co" 'org-clock-out
 		"cu" 'org-clock-update-time-maybe
@@ -361,9 +398,6 @@
 
 (use-package evil
 	:custom
-  (with-eval-after-load 'dired
-    (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
-    (evil-define-key 'normal dired-mode-map (kbd "l") 'dired-find-file))
 	(evil-want-integration t)
 	(evil-want-keybinding nil)
   (evil-want-C-u-scroll t)
@@ -408,26 +442,28 @@
 	(dired-preview-global-mode 1)
 	)
 
-(use-package fzf
-  :general
-  (general-nmap
-   :prefix "SPC"
-   "bi" 'fzf-switch-buffer
-  )
-)
+;; (use-package fzf
+;;   :general
+;;   (general-nmap
+;;    :prefix "SPC"
+;;    "bi" 'fzf-switch-buffer
+;;   )
+;; )
 
 (use-package zoxide
 	:general
-	(general-nmap
+	(general-define-key
     :prefix "SPC"
+    :states '(normal)
     "." 'zoxide-travel-with-query)
 	)
 
 (use-package magit
 	:ensure t
   :general
-  (general-nmap
+  (general-define-key
     :prefix "SPC"
+    :states '(normalsual)
    "m" 'magit)
 	)
 
