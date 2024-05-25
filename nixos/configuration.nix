@@ -12,6 +12,7 @@
       ./audio.nix
       ./desktop.nix
       ./power.nix
+      ./emacs.nix
     ];
 
     #sops.defaultSopsFile = ./secrets/secrets.yaml;
@@ -92,7 +93,6 @@
       acpi
       git
       home-manager
-      networkmanagerapplet
       pcmanfm
       vlc
       zfs
@@ -156,7 +156,6 @@
 
         ghc
         calibre
-        (aspellWithDicts (dicts: with dicts; [ en en-computers en-science ]))
       ];
     };
 

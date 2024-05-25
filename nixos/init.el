@@ -12,19 +12,29 @@
 			(eval-print-last-sexp)))
 	(load bootstrap-file nil 'nomessage))
 
-;; (straight-use-package 'use-package)
-(require 'use-package)
-(require 'general)
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+;; (require 'use-package)
+(require 'package)
+
+(setq package-archives
+      '(("gnu" . "https://elpa.gnu.org/packages/")
+        ("gnu-devel" . "https://elpa.gnu.org/devel/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+        ("melpa" . "https://melpa.org/packages/")))
 
 (use-package general
   :config
   (general-evil-setup t)
-  ;; Unbind other uses if key if defined (e.g. unbind evil-forward-char from SPC)
   (general-auto-unbind-keys)
+
+  (general-create-definer rune/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
   :ensure t
   :demand t
-  :after evil
-)
+  )
 
 (use-package emacs
 	:custom
@@ -41,9 +51,6 @@
 	(default-tab-width 2)
 	(warning-minimum-level :error)
 	:init
-	(add-to-list 'custom-theme-load-path "~/.emacs.d/everforest-emacs")
-	(load-file "~/.emacs.d/everforest-emacs/everforest-hard-dark-theme.el")
-	;;(load-theme 'everforest-hard-dark t)
 	(set-face-attribute 'default nil :font "Iosevka Comfy")
 
 	(tool-bar-mode -1)
@@ -67,39 +74,29 @@
 	("C-c /" . comment-or-uncomment-region)
 
   :general
-  (general-define-key
-   :prefix "SPC"
-   :states '(normal visual)
+  (rune/leader-keys
 		"bk" 'kill-this-buffer
 		"bm" 'buffer-menu
     "r" 'recentf
+    "bi" 'switch-to-buffer
+    "w" (general-simulate-key "C-w")
+  )
+
+  (rune/leader-keys
+   :keymaps 'dired-mode-map
+    "h" 'dired-up-directory
+    "l" 'dired-find-file
+    "C-o" 'casual-dired-tmenu
+    "q" 'kill-this-buffer
   )
   :diminish visual-line-mode
-)
-
-(use-package rand-theme
-  :config
-  (setq rand-theme-unwanted '(leuven tango adwaita light-blue tsdh-light dichromacy whiteboard))
-  (rand-theme)
+  :after general
 )
 
 (use-package doom-themes
   :ensure t
   :config
-  ;; Global settings (defaults)
-  ;; (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-  ;;       doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; (load-theme 'doom-one t)
-
-  ;; ;; Enable flashing mode-line on errors
-  ;; (doom-themes-visual-bell-config)
-  ;; ;; Enable custom neotree theme (all-the-icons must be installed!)
-  ;; (doom-themes-neotree-config)
-  ;; ;; or for treemacs users
-  ;; (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  (doom-themes-treemacs-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config)
+  (load-theme 'doom-monokai-ristretto t)
   )
 
 (use-package whitespace
@@ -134,20 +131,8 @@
 
 (use-package casual-dired
 	:straight (:type git :host github :repo "kickingvegas/casual-dired")
-  :general
-  (general-define-key :keymaps 'dired-mode-map
-    :states '(normal)
-    "h" 'dired-up-directory
-    "l" 'dired-find-file
-    "o" 'dired-sort-toggle-or-edit
-    "C-o" 'casual-dired-tmenu
-    "v" 'dired-toggle-marks
-    "m" 'dired-mark
-    "u" 'dired-unmark
-    "U" 'dired-unmark-all-marks
-    "c" 'dired-create-directory
-    "q" 'kill-this-buffer)
 )
+
 
 (use-package bind-key
 	:demand t)
@@ -163,9 +148,7 @@
 	:init
 	(setq imenu-list-focus-after-activation t)
   :general
-  (general-define-key
-    :prefix "SPC"
-    :states '(normal visual)
+  (rune/leader-keys
 	"si" 'imenu-list-smart-toggle
   )
 )
@@ -181,34 +164,51 @@
 	(completion-ignore-case t)
 	:config
 	(vertico-mode)
+	(savehist-mode)
 	:ensure t
 )
 
 (use-package corfu
-	;; Optional customizations
   :ensure t
 	:custom
-	(corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-	(corfu-auto t)                 ;; Enable auto completion
-	(corfu-separator ?\s)          ;; Orderless field separator
-	;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-	;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-	;; (corfu-preview-current nil)    ;; Disable current candidate preview
-	;; (corfu-preselect 'prompt)      ;; Preselect the prompt
-	;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-	;; (corfu-scroll-margin 5)        ;; Use scroll margin
+	(corfu-cycle t)
+	(corfu-auto t)
+	;; (corfu-separator ?\s)
   (corfu-auto-prefix 2)
   (corfu-auto-delay 0.2)
   (corfu-popupinfo-delay '(0.4 . 0.2))
   (corfu-echo-documentation t)
-  (ispell-alternate-dictionary " /home/alistair/.local/state/nix/profiles/profile/lib/aspell/en-common.rws ")
-  :hook ((after-init . global-corfu-mode)
-	  (global-corfu-mode . corfu-popupinfo-mode))
+  :hook
+  (
+	  (after-init . global-corfu-mode)
+	  (global-corfu-mode . corfu-popupinfo-mode)
+  )
 	:diminish corfu-mode
 )
 
+(use-package cape
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  ;; (add-to-list 'completion-at-point-functions #'cape-sgml)
+  )
+
+(use-package yasnippet-capf
+  :after cape
+  ;; :custom
+  ;; (yasnippet-capf-lookup-by 'name)
+  :config
+  (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+
+(use-package kind-icon
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
 (use-package elfeed
 	:custom
+  (shr-max-image-proportion 0.5)
 	(browse-url-browser-function 'eww-browse-url)
 	(elfeed-feeds
 		'(("https://xeiaso.net/blog.rss" nix)
@@ -217,40 +217,25 @@
 		 ("https://samoa.dcs.gla.ac.uk/events/rest/Feed/rss/123" research)
 		 ("https://xkcd.com/rss.xml" misc)))
   :general
-  (general-define-key
-    :prefix "SPC"
-    :states '(normal visual)
+  (rune/leader-keys
     "e" 'elfeed
   )
 	:defer t
 )
 
-(setq shr-max-image-proportion 0.5)
-
-;; Persist history over Emacs restarts. Vertico sorts by history position.
-(use-package savehist
-	:init
-	(savehist-mode)
-)
 
 (use-package markdown-mode
 	:defer t
 	)
 
 (use-package eglot
-	:hook
-  (
-  (prog-mode . eglot-ensure)
-  ((c-mode c++-mode go-mode java-mode js-mode python-mode rust-mode web-mode) . eglot-ensure)
-  )
+	:hook (prog-mode . eglot-ensure)
   :config
   (add-to-list 'eglot-server-programs '(gleam-mode . ("gleam" "lsp")))
   (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
   :general
-  (general-define-
-    :prefix "SPC"
-    :states '(normal)
-    :keymaps 'prog-mode-map
+  (rune/leader-keys
+   :keymaps 'prog-mode-map
    "lr" 'eglot-rename
   )
 	:bind
@@ -258,18 +243,9 @@
   :demand t
 )
 
-;; Enable Corfu completion UI
-;; See the Corfu README for more configuration tips.
-(use-package corfu
-  :init
-  (global-corfu-mode)
-)
-
-
 (use-package eldoc
 	:init
 	(global-eldoc-mode))
-
 
 (use-package nix-mode
 	;;:hook
@@ -280,6 +256,7 @@
 (use-package yasnippet
 	:init
 	(yas-global-mode 1)
+  (yas-minor-mode-on)
 	:bind
 	("M-s" . yas-insert-snippet)
 	:custom
@@ -287,8 +264,6 @@
 	:ensure t
 	:diminish yas-minor-mode
 	)
-
-(yas-minor-mode-on)
 
 (use-package org
 	:custom
@@ -308,9 +283,7 @@
     (org-map-entries (lambda () (org-sort-entries nil ?o)) nil 'tree))
 
   :general
-  (general-define-key
-    :prefix "SPC"
-    :states '(normal visual)
+  (rune/leader-keys
     :keymaps 'org-mode-map
 		"co" 'org-clock-out
 		"cu" 'org-clock-update-time-maybe
@@ -331,27 +304,27 @@
 	(org-mode . org-auto-tangle-mode)
 	)
 
-(use-package org-sticky-header-mode
-	:straight (:type git :host github :repo "alphapapa/org-sticky-header")
-	:init
-	(setq org-sticky-header-full-path 'full)
-	(setq org-sticky-header-outline-path-seperator " / ")
-	:hook
-	(org-mode . org-sticky-header-mode)
-	:defer t
-)
+;; (use-package org-sticky-header-mode
+;; 	:straight (:type git :host github :repo "alphapapa/org-sticky-header")
+;; 	:init
+;; 	(setq org-sticky-header-full-path 'full)
+;; 	(setq org-sticky-header-outline-path-seperator " / ")
+;; 	:hook
+;; 	(org-mode . org-sticky-header-mode)
+;; 	:defer t
+;; )
 
-(use-package org-superstar
-	:custom
-	(org-hide-leading-stars t)
-	(org-superstar-leading-bullet ?\s)
-	(org-indent-mode-turns-on-hiding-stars nil)
-	:hook
-	(org-mode-hook . org-superstar-mode)
-	:defer t
-	)
+;; (use-package org-superstar
+;; 	:custom
+;; 	(org-hide-leading-stars t)
+;; 	(org-superstar-leading-bullet ?\s)
+;; 	(org-indent-mode-turns-on-hiding-stars nil)
+;; 	:hook
+;; 	(org-mode-hook . org-superstar-mode)
+;; 	:defer t
+;; 	)
 
-(use-package htmlize)
+;; (use-package htmlize)
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -361,24 +334,24 @@
 	 (java . t)
 	 ))
 
-;;(use-package org-roam
-;;	:init
-;;	(setq org-roam-directory "~/org")
-;;
-;;	(setq org-roam-capture-templates
-;;		'(("d" "default" plain
-;;			"%?"
-;;			:if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org"
-;;				"#+title: ${title}\n")
-;;			:unnarrowed t
-;;			:jump-to-captured t)
-;;		("m" "meeting" plain
-;;			"%?"
-;;			:if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org"
-;;				"=================\n** Meeting %U\nAttendees:\n")
-;;			:unnarrowed t
-;;			:jump-to-captured t)))
-;;)
+;; ;;(use-package org-roam
+;; ;;	:init
+;; ;;	(setq org-roam-directory "~/org")
+;; ;;
+;; ;;	(setq org-roam-capture-templates
+;; ;;		'(("d" "default" plain
+;; ;;			"%?"
+;; ;;			:if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org"
+;; ;;				"#+title: ${title}\n")
+;; ;;			:unnarrowed t
+;; ;;			:jump-to-captured t)
+;; ;;		("m" "meeting" plain
+;; ;;			"%?"
+;; ;;			:if-new (file+head "${slug}-%<%Y%m%d%H%M%S>.org"
+;; ;;				"=================\n** Meeting %U\nAttendees:\n")
+;; ;;			:unnarrowed t
+;; ;;			:jump-to-captured t)))
+;; ;;)
 
 
 ;;
@@ -437,33 +410,21 @@
 	)
 (keymap-global-set "s-c" 'calc)
 
-(use-package dired-preview
-	:init
-	(dired-preview-global-mode 1)
-	)
-
-;; (use-package fzf
-;;   :general
-;;   (general-nmap
-;;    :prefix "SPC"
-;;    "bi" 'fzf-switch-buffer
-;;   )
-;; )
+;; (use-package dired-preview
+;; 	:init
+;; 	(dired-preview-global-mode 1)
+;; 	)
 
 (use-package zoxide
 	:general
-	(general-define-key
-    :prefix "SPC"
-    :states '(normal)
+	(rune/leader-keys
     "." 'zoxide-travel-with-query)
 	)
 
 (use-package magit
 	:ensure t
   :general
-  (general-define-key
-    :prefix "SPC"
-    :states '(normalsual)
+  (rune/leader-keys
    "m" 'magit)
 	)
 
@@ -477,6 +438,7 @@
 	)
 
 (use-package go-mode
+  :mode ("\\.go?$" . go-mode)
 	:custom
 	(compile-command "go test -v")
 	:hook

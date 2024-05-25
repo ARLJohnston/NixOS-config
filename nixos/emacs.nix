@@ -1,11 +1,9 @@
 { pkgs, inputs, config, ... }:
 let
-  home = config.home.homeDirectory;
-
   my_emacs = (pkgs.emacsWithPackagesFromUsePackage {
     package = pkgs.emacs-pgtk;
     config = ./init.el;
-    defaultInitFile = false;
+    defaultInitFile = true;
     alwaysEnsure = true;
 
     extraEmacsPackages = epkgs: [
@@ -27,9 +25,7 @@ let
     override = final: prev: { NIX_CFLAGS_COMPILE = [ "-O3" "-march=native" ]; };
   });
 in {
-  home.packages = with pkgs; [
-    mu
-
+  environment.systemPackages = with pkgs; [
     clang
     #lsp-servers
     erlang-ls
@@ -48,18 +44,16 @@ in {
     texliveMedium
     emacs-all-the-icons-fonts
     my_emacs
-    (aspellWithDicts (dicts: with dicts; [ en en-computers en-science ]))
   ];
 
-  home.file = {
-    ".emacs" = {
-      source = ./init.el;
-    };
-  };
+  # home.file = {
+  #   ".emacs" = {
+  #     source = ./init.el;
+  #   };
+  # };
 
   services.emacs = {
     enable = true;
-    package = my_emacs;
   };
 
   nixpkgs.overlays = [ (import inputs.emacs-overlay) ];

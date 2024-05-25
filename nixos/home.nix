@@ -43,31 +43,22 @@ in
     }
   ];
 
-  programs.mu = {
-    enable = true;
-  };
-
-  services.mbsync = {
-    enable = true;
-  };
-  # https://miikanissi.com/blog/email-setup-with-mbsync-mu4e/
-
-  # programs = {
-  #   direnv  = {
-  #     enable = true;
-  #     enableBashIntegration = true;
-  #     nix-direnv.enable = true;
-  #   };
-  #   bash.enable = true;
-  # };
-
   home.packages = with pkgs; [
     lsd
     tree
     zoxide
+
+    (aspellWithDicts (dicts: with dicts; [ en en-computers en-science ]))
   ];
 
   home.file = {
+    ".aspell.conf".text = ''
+  dict-dir ${pkgs.aspellWithDicts (dicts: with dicts; [ en en-computers en-science])}/lib/aspell
+    '';
+
+    ".emacs.d/init.el" = {
+      source = ./init.el;
+    };
   };
 
   home.sessionVariables = {
