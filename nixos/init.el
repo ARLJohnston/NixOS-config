@@ -26,10 +26,11 @@
 (use-package general
   :config
   (general-evil-setup t)
-  (general-auto-unbind-keys)
+  ;;(general-auto-unbind-keys)
 
   (general-create-definer rune/leader-keys
-    :keymaps '(normal insert visual emacs)
+    :states '(normal visual motion emacs insert)
+    :keymaps 'override
     :prefix "SPC"
     :global-prefix "C-SPC")
   :ensure t
@@ -145,8 +146,8 @@
 )
 
 (use-package imenu-list
-	:init
-	(setq imenu-list-focus-after-activation t)
+	:config
+	(imenu-list-focus-after-activation t)
   :general
   (rune/leader-keys
 	"si" 'imenu-list-smart-toggle
@@ -194,10 +195,16 @@
 
 (use-package yasnippet-capf
   :after cape
-  ;; :custom
-  ;; (yasnippet-capf-lookup-by 'name)
+  :custom
+  (yasnippet-capf-lookup-by 'name)
   :config
-  (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+  (add-to-list 'completion-at-point-functions #'yasnippet-capf)
+
+  (setq completion-at-point-functions
+                (list (cape-capf-super
+                       #'yasnippet-capf
+                       #'eglot-completion-at-point)))
+  )
 
 (use-package kind-icon
   :after corfu
@@ -296,8 +303,8 @@
 	)
 
 (use-package org-auto-tangle
-	:init
-	(setq org-auto-tangle-default t)
+	:config
+	(org-auto-tangle-default t)
 	:ensure t
 	:diminish org-auto-tangle-mode
 	:hook
@@ -393,11 +400,12 @@
 	:init
 	(global-undo-tree-mode 1)
 	(evil-set-undo-system 'undo-tree)
-	(setq undo-tree-history-directory-alist '(("." . "~/.backups/")))
-	(setq undo-tree-visualizer-timestamps t)
-  (setq delete-old-versions t)
-  (setq kept-new-versions 6)
-  (setq kept-old-versions 2)
+  :config
+	(undo-tree-history-directory-alist '(("." . "~/.backups/")))
+	(undo-tree-visualizer-timestamps t)
+  (delete-old-versions t)
+  (kept-new-versions 6)
+  (kept-old-versions 2)
 	:ensure t
 	:diminish undo-tree-mode
 	:after evil
@@ -468,8 +476,8 @@
   :ensure t
   :mode ("\\.rs?$" . rustic-mode)
   :config
-  (setq rustic-format-on-save t)
-  (setq rustic-lsp-client 'eglot))
+  (rustic-format-on-save t)
+  (rustic-lsp-client 'eglot))
 
 (use-package tree-sitter-indent)
 
