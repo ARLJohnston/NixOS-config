@@ -12,8 +12,9 @@
 			(eval-print-last-sexp)))
 	(load bootstrap-file nil 'nomessage))
 
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
+;; If I uncomment the below then all packages will be evaluated on load because of nix/emacs things
+;; (straight-use-package 'use-package)
+;; (setq straight-use-package-by-default t)
 ;; (require 'use-package)
 (require 'package)
 
@@ -44,7 +45,7 @@
 	(initial-scratch-message 'nil)
 ;; Emacs 28 and newer: Hide commands in M-x which do not work in the current mode
 	(read-extended-command-predicate #'command-completion-default-include-p)
-	(backup-directory-alist '((".*" . "~/.backups/")))
+	;; (backup-directory-alist '((".*" . "~/.backups/")))
 ;; Less Jumpy scrolling
 	(scroll-step 1)
 	(scroll-margin 4)
@@ -76,14 +77,23 @@
 
   :general
   (rune/leader-keys
-		"bk" 'kill-this-buffer
+		"bk" 'kill-current-buffer
 		"bm" 'buffer-menu
-    "r" 'recentf
-    "bi" 'switch-to-buffer
+    "bi" 'recentf
+    "r" 'switch-to-buffer
     "w" (general-simulate-key "C-w")
+    "SPC" 'find-file
+    "f" 'avy-goto-char
   )
 
-  (rune/leader-keys
+  (general-define-key
+   :states '(insert normal motion visual)
+   "C-f" 'avy-goto-char
+   "C-t" 'avy-goto-char-timer
+  )
+
+  (general-define-key
+   :states '(normal)
    :keymaps 'dired-mode-map
     "h" 'dired-up-directory
     "l" 'dired-find-file
@@ -93,6 +103,8 @@
   :diminish visual-line-mode
   :after general
 )
+
+(use-package avy)
 
 (use-package doom-themes
   :ensure t
@@ -175,7 +187,7 @@
 	(corfu-cycle t)
 	(corfu-auto t)
 	;; (corfu-separator ?\s)
-  (corfu-auto-prefix 2)
+  (corfu-auto-prefix 1)
   (corfu-auto-delay 0.2)
   (corfu-popupinfo-delay '(0.4 . 0.2))
   (corfu-echo-documentation t)
@@ -187,24 +199,6 @@
 	:diminish corfu-mode
 )
 
-(use-package cape
-  :init
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  ;; (add-to-list 'completion-at-point-functions #'cape-sgml)
-  )
-
-(use-package yasnippet-capf
-  :after cape
-  :custom
-  (yasnippet-capf-lookup-by 'name)
-  :config
-  (add-to-list 'completion-at-point-functions #'yasnippet-capf)
-
-  (setq completion-at-point-functions
-                (list (cape-capf-super
-                       #'yasnippet-capf
-                       #'eglot-completion-at-point)))
-  )
 
 (use-package kind-icon
   :after corfu
@@ -225,7 +219,7 @@
 		 ("https://xkcd.com/rss.xml" misc)))
   :general
   (rune/leader-keys
-    "e" 'elfeed
+    "e" '(lambda () (interactive) (elfeed-update) (elfeed))
   )
 	:defer t
 )
@@ -234,29 +228,125 @@
 (use-package markdown-mode
 	:defer t
 	)
-
-(use-package eglot
-	:hook (prog-mode . eglot-ensure)
+(use-package lsp-mode
+  :ensure t
+  :commands lsp
+  :hook
+  ((rust-mode . (lsp lsp-inlay-hints-mode))
+   (go-mode . (lsp lsp-inlay-hints-mode))
+   (kotlin-mode . lsp)
+   (c++-mode . lsp)
+   (lua-mode . lsp)
+   (prog-mode . lsp)
+   )
   :config
-  (add-to-list 'eglot-server-programs '(gleam-mode . ("gleam" "lsp")))
-  (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
-  :general
-  (rune/leader-keys
-   :keymaps 'prog-mode-map
-   "lr" 'eglot-rename
-  )
-	:bind
-	("M-RET" . eglot-code-actions)
-  :demand t
-)
+  (gc-cons-threshold 100000000)
+  (read-process-output-max (* 1024 1024)) ;; 1mb
+  :custom
+  ;; cc-mode does not work well when following two settings are enabled.
+  (lsp-enable-on-type-formatting nil)
+  (lsp-enable-indentation nil)
+  (lsp-diagnostics-provider :flymake)
+  (lsp-headerline-breadcrumb-icons-enable t)
+  (lsp-enable-snippet t)
+  (lsp-auto-guess-root t)
+  (lsp-idle-delay 0.1)
+  (lsp-log-io t)
+  (lsp-modeline-code-actions-enable nil)
+  (lsp-completion-provider :none)
+  (lsp-eldoc-render-all t)
+  (lsp-ui-doc-mode 1)
+  :bind
+  (:map lsp-mode-map
+		("C-c C-l" . lsp-execute-code-action)
+		("C-c r" . lsp-rename))
+  :config
+  (add-hook 'c++-mode-hook '(lambda() (add-hook 'before-save-hook 'lsp-format-buffer t t))))
 
-(use-package eldoc
-	:init
-	(global-eldoc-mode))
+(use-package lsp-ui
+  :ensure t
+  :hook (lsp-mode-hook . lsp-ui-mode)
+  :custom
+  ;; doc
+  (lsp-ui-doc-enable nil)
+  ;; sideline
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-show-diagnostics nil)
+  (lsp-ui-sideline-ignore-duplicate t)
+  (lsp-ui-sideline-show-hover nil)
+  :init
+  (defun toggle-lsp-ui-sideline ()
+	(interactive)
+	(if lsp-ui-sideline-show-hover
+        (progn
+          (setq lsp-ui-sideline-show-hover nil
+				lsp-ui-sideline-show-code-actions nil
+				lsp-ui-sideline-show-diagnostics nil)
+          (message "sideline-hover disabled"))
+      (progn
+        (setq lsp-ui-sideline-show-hover t
+			  lsp-ui-sideline-show-code-actions t
+			  lsp-ui-sideline-show-diagnostics t)
+        (message "sideline-hover enabled"))))
+  (defun toggle-lsp-ui-imenu ()
+    (interactive)
+	(let ((imenu-buffer (get-buffer lsp-ui-imenu-buffer-name)))
+	  (if imenu-buffer
+		  (progn
+			(lsp-ui-imenu-buffer-mode -1)
+			(kill-buffer lsp-ui-imenu-buffer-name)
+			(message "lsp-ui-imenu disabled"))
+		(progn
+		  (lsp-ui-imenu)
+		  (message "lsp-ui-imenu enabled")))))
+  :bind
+  (:map lsp-mode-map
+		("C-c C-i" . lsp-ui-peek-find-implementation)
+		("M-." . lsp-ui-peek-find-definitions)
+		("M-?" . lsp-ui-peek-find-references)
+		("C-c i" . toggle-lsp-ui-imenu)
+		("C-c C-s" . toggle-lsp-ui-sideline)))
+
+
+(use-package lsp-treemacs
+  :ensure t
+  :after lsp-mode)
+
+(use-package sideline)
+
+(use-package sideline-flymake
+  :hook (flymake-mode . sideline-mode)
+  :init
+  (setq sideline-flymake-display-mode 'point) ; 'point to show errors only on point
+                                              ; 'line to show errors on the current line
+  (setq sideline-backends-right '(sideline-flymake)))
+
+
+;; (use-package eglot
+;; 	:hook (prog-mode . eglot-ensure)
+;;   :config
+;;   (add-to-list 'eglot-server-programs '(gleam-mode . ("gleam" "lsp")))
+;;   (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
+;;   :general
+;;   (rune/leader-keys
+;;    :keymaps 'prog-mode-map
+;;    "lr" 'eglot-rename
+;;   )
+;; 	:bind
+;; 	("M-RET" . eglot-code-actions)
+;;   :demand t
+;; )
+
+;; (use-package eldoc
+;; 	:init
+;; 	(global-eldoc-mode))
 
 (use-package nix-mode
 	;;:hook
 	;;(before-save . nix-mode-format)
+  :init
+  (add-hook 'nix-mode-hook
+    (lambda () (add-hook 'before-save-hook 'nix-format-buffer nil t)))
 	:defer t
 )
 
@@ -298,8 +388,7 @@
   )
 	:ensure t
 	:hook
-  ;;(add-hook 'before-save-hook #'org-agenda-sort-headers)
-	(org-mode . flyspell-mode)
+  (before-save-hook . #'org-agenda-sort-headers)
 	)
 
 (use-package org-auto-tangle
@@ -396,27 +485,52 @@
   :after evil
 	)
 
+(use-package jinx
+  :hook (emacs-startup . global-jinx-mode)
+  :bind (("M-$" . jinx-correct)
+         ("C-M-$" . jinx-languages))
+  :general
+  (general-define-key
+   "C-;" 'jinx-correct)
+  :diminish jinx-mode
+  )
+
 (use-package undo-tree
 	:init
 	(global-undo-tree-mode 1)
 	(evil-set-undo-system 'undo-tree)
   :config
-	(undo-tree-history-directory-alist '(("." . "~/.backups/")))
-	(undo-tree-visualizer-timestamps t)
+	;;(undo-history-directory-alist '(("." . "~/.backups/")))
   (delete-old-versions t)
   (kept-new-versions 6)
   (kept-old-versions 2)
+  :custom
+  (undo-tree-history-directory-alist '(("." . "~/.backups")))
 	:ensure t
 	:diminish undo-tree-mode
 	:after evil
 	)
 
 (use-package vterm
-	:init
-	(keymap-global-set "s-<return>" 'vterm-other-window)
-	:defer t
+	:ensure t
 	)
+(use-package vterm-toggle
+  :init
+	(keymap-global-set "s-<return>" 'vterm-toggle)
+  :ensure t
+  )
 (keymap-global-set "s-c" 'calc)
+
+(use-package toggle-term
+  :bind (("M-o f" . toggle-term-find)
+         ("M-o t" . toggle-term-term)
+         ("M-o s" . toggle-term-shell)
+         ("M-o e" . toggle-term-eshell)
+         ("M-o i" . toggle-term-ielm)
+         ("M-o o" . toggle-term-toggle))
+  :config
+    (setq toggle-term-size 25)
+    (setq toggle-term-switch-upon-toggle t))
 
 ;; (use-package dired-preview
 ;; 	:init
@@ -467,21 +581,125 @@
 (use-package envrc
 	:hook (after-init . envrc-global-mode))
 
-(use-package erlang
+(use-package erlang)
+
+(use-package erlang-mode
 	:defer t
   :mode ("\\.erl?$" . erlang-mode)
 )
 
 (use-package rustic
-  :ensure t
+  :defer t
   :mode ("\\.rs?$" . rustic-mode)
   :config
-  (rustic-format-on-save t)
-  (rustic-lsp-client 'eglot))
+  (rustic-format-on-save t))
 
 (use-package tree-sitter-indent)
 
-(use-package gleam-mode
-  :load-path "~/.emacs.d/gleam-mode"
-  :mode "\\.gleam\\'"
-  )
+(add-to-list 'load-path "~/.emacs.d/gleam-mode")
+(load-library "gleam-mode")
+
+;; (defun gleam-format-before-save ()
+;;   (interactive)
+;;   (when (eq major-mode 'gleam-mode) (gleam-format))
+;;   )
+(add-hook 'gleam-mode-hook
+          (lambda () (add-hook 'before-save-hook 'gleam-format nil t)))
+
+;; (add-hook 'before-save-hook 'gleam-format-before-save)
+
+;; (use-package exwm
+;;   :init
+;; (start-process-shell-command "xmodmap" nil "xmodmap ~/.emacs.d/exwm/Xmodmap")
+;;   :config
+;;   ;; Set the default number of workspaces
+;;   (setq exwm-workspace-number 5)
+
+;;   ;; When window "class" updates, use it to set the buffer name
+;;   ;; (add-hook 'exwm-update-class-hook #'efs/exwm-update-class)
+
+;;   ;; These keys should always pass through to Emacs
+;;   (setq exwm-input-prefix-keys
+;;     '(?\C-x
+;;       ?\C-u
+;;       ?\C-h
+;;       ?\M-x
+;;       ?\M-`
+;;       ?\M-&
+;;       ?\M-:
+;;       ?\C-\M-j  ;; Buffer list
+;;       ?\C-\ ))  ;; Ctrl+Space
+
+;;   ;; Ctrl+Q will enable the next key to be sent directly
+;;   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+;;   ;; Set up global key bindings.  These always work, no matter the input state!
+;;   ;; Keep in mind that changing this list after EXWM initializes has no effect.
+;;   (setq exwm-input-global-keys
+;;         `(
+;;           ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+;;           ([?\s-r] . exwm-reset)
+
+;;           ;; Move between windows
+;;           ([s-left] . windmove-left)
+;;           ([s-right] . windmove-right)
+;;           ([s-up] . windmove-up)
+;;           ([s-down] . windmove-down)
+
+;;           ;; Launch applications via shell command
+;;           ([?\s-&] . (lambda (command)
+;;                        (interactive (list (read-shell-command "$ ")))
+;;                        (start-process-shell-command command nil command)))
+
+;;           ;; Switch workspace
+;;           ([?\s-w] . exwm-workspace-switch)
+
+;;           ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
+;;           ,@(mapcar (lambda (i)
+;;                       `(,(kbd (format "s-%d" i)) .
+;;                         (lambda ()
+;;                           (interactive)
+;;                           (exwm-workspace-switch-create ,i))))
+;;                     (number-sequence 0 9))))
+
+;;   (exwm-enable))
+
+(defun lsp-booster--advice-json-parse (old-fn &rest args)
+  "Try to parse bytecode instead of json."
+  (or
+   (when (equal (following-char) ?#)
+     (let ((bytecode (read (current-buffer))))
+       (when (byte-code-function-p bytecode)
+         (funcall bytecode))))
+   (apply old-fn args)))
+(advice-add (if (progn (require 'json)
+                       (fboundp 'json-parse-buffer))
+                'json-parse-buffer
+              'json-read)
+            :around
+            #'lsp-booster--advice-json-parse)
+
+(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+  "Prepend emacs-lsp-booster command to lsp CMD."
+  (let ((orig-result (funcall old-fn cmd test?)))
+    (if (and (not test?)                             ;; for check lsp-server-present?
+             (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+             lsp-use-plists
+             (not (functionp 'json-rpc-connection))  ;; native json-rpc
+             (executable-find "emacs-lsp-booster"))
+        (progn
+          (message "Using emacs-lsp-booster for %s!" orig-result)
+          (cons "emacs-lsp-booster" orig-result))
+      orig-result)))
+(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+
+(use-package ligature
+  :config
+  ;; Enable all Iosevka ligatures in programming modes
+  (ligature-set-ligatures 'prog-mode '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
+                                       "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
+                                       "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
+                                       ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++"))
+  ;; Enables ligature checks globally in all buffers. You can also do it
+  ;; per mode with `ligature-mode'.
+  (global-ligature-mode t))
