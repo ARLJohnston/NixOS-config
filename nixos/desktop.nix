@@ -1,15 +1,16 @@
-{ pkgs, ... }:
-{
+{ pkgs, ... }: {
   environment.systemPackages = with pkgs; [
     brightnessctl
     grim
     wl-clipboard
-    river
     slurp
     wofi
     swaybg
     swaylock
   ];
+
+  # services.xserver.displayManager.lightdm.enable = true;
+  # services.xserver.windowManager.exwm.enable = true;
 
   security.polkit.enable = true;
 
@@ -28,7 +29,7 @@
     enable = true;
     settings = rec {
       initial_session = {
-        command = "${pkgs.river}/bin/river";
+        command = "${pkgs.hyprland}/bin/hyprland";
         user = "alistair";
       };
       default_session = initial_session;
