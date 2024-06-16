@@ -211,6 +211,7 @@
 	:custom
   (shr-max-image-proportion 0.5)
 	(browse-url-browser-function 'eww-browse-url)
+  (elfeed-search-filter "")
 	(elfeed-feeds
 		'(("https://xeiaso.net/blog.rss" nix)
 		 ("https://servo.org/blog/feed.xml" mis)
@@ -228,6 +229,7 @@
 (use-package markdown-mode
 	:defer t
 	)
+
 (use-package lsp-mode
   :ensure t
   :commands lsp
@@ -239,21 +241,18 @@
    (lua-mode . lsp)
    (prog-mode . lsp)
    )
-  :config
-  (gc-cons-threshold 100000000)
-  (read-process-output-max (* 1024 1024)) ;; 1mb
   :custom
   ;; cc-mode does not work well when following two settings are enabled.
+  (gc-cons-threshold 100000000)
+  (read-process-output-max (* 1024 1024)) ;; 1mb
   (lsp-enable-on-type-formatting nil)
-  (lsp-enable-indentation nil)
+  (lsp-enable-indentation t)
   (lsp-diagnostics-provider :flymake)
   (lsp-headerline-breadcrumb-icons-enable t)
   (lsp-enable-snippet t)
   (lsp-auto-guess-root t)
   (lsp-idle-delay 0.1)
-  (lsp-log-io t)
-  (lsp-modeline-code-actions-enable nil)
-  (lsp-completion-provider :none)
+  ;; (lsp-completion-provider :none)
   (lsp-eldoc-render-all t)
   (lsp-ui-doc-mode 1)
   :bind
@@ -261,7 +260,7 @@
 		("C-c C-l" . lsp-execute-code-action)
 		("C-c r" . lsp-rename))
   :config
-  (add-hook 'c++-mode-hook '(lambda() (add-hook 'before-save-hook 'lsp-format-buffer t t))))
+  (add-hook 'rust-mode-hook '(lambda() (add-hook 'before-save-hook 'lsp-format-buffer t t))))
 
 (use-package lsp-ui
   :ensure t
@@ -269,25 +268,7 @@
   :custom
   ;; doc
   (lsp-ui-doc-enable nil)
-  ;; sideline
-  (lsp-ui-sideline-enable t)
-  (lsp-ui-sideline-show-diagnostics nil)
-  (lsp-ui-sideline-ignore-duplicate t)
-  (lsp-ui-sideline-show-hover nil)
   :init
-  (defun toggle-lsp-ui-sideline ()
-	(interactive)
-	(if lsp-ui-sideline-show-hover
-        (progn
-          (setq lsp-ui-sideline-show-hover nil
-				lsp-ui-sideline-show-code-actions nil
-				lsp-ui-sideline-show-diagnostics nil)
-          (message "sideline-hover disabled"))
-      (progn
-        (setq lsp-ui-sideline-show-hover t
-			  lsp-ui-sideline-show-code-actions t
-			  lsp-ui-sideline-show-diagnostics t)
-        (message "sideline-hover enabled"))))
   (defun toggle-lsp-ui-imenu ()
     (interactive)
 	(let ((imenu-buffer (get-buffer lsp-ui-imenu-buffer-name)))
@@ -307,39 +288,17 @@
 		("C-c i" . toggle-lsp-ui-imenu)
 		("C-c C-s" . toggle-lsp-ui-sideline)))
 
-
 (use-package lsp-treemacs
   :ensure t
   :after lsp-mode)
 
 (use-package sideline)
 
-(use-package sideline-flymake
-  :hook (flymake-mode . sideline-mode)
-  :init
-  (setq sideline-flymake-display-mode 'point) ; 'point to show errors only on point
-                                              ; 'line to show errors on the current line
-  (setq sideline-backends-right '(sideline-flymake)))
-
-
-;; (use-package eglot
-;; 	:hook (prog-mode . eglot-ensure)
-;;   :config
-;;   (add-to-list 'eglot-server-programs '(gleam-mode . ("gleam" "lsp")))
-;;   (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
-;;   :general
-;;   (rune/leader-keys
-;;    :keymaps 'prog-mode-map
-;;    "lr" 'eglot-rename
-;;   )
-;; 	:bind
-;; 	("M-RET" . eglot-code-actions)
-;;   :demand t
-;; )
-
-;; (use-package eldoc
-;; 	:init
-;; 	(global-eldoc-mode))
+(use-package eldoc
+	:init
+	(global-eldoc-mode)
+  :diminish eldoc-mode
+  )
 
 (use-package nix-mode
 	;;:hook
@@ -399,28 +358,6 @@
 	:hook
 	(org-mode . org-auto-tangle-mode)
 	)
-
-;; (use-package org-sticky-header-mode
-;; 	:straight (:type git :host github :repo "alphapapa/org-sticky-header")
-;; 	:init
-;; 	(setq org-sticky-header-full-path 'full)
-;; 	(setq org-sticky-header-outline-path-seperator " / ")
-;; 	:hook
-;; 	(org-mode . org-sticky-header-mode)
-;; 	:defer t
-;; )
-
-;; (use-package org-superstar
-;; 	:custom
-;; 	(org-hide-leading-stars t)
-;; 	(org-superstar-leading-bullet ?\s)
-;; 	(org-indent-mode-turns-on-hiding-stars nil)
-;; 	:hook
-;; 	(org-mode-hook . org-superstar-mode)
-;; 	:defer t
-;; 	)
-
-;; (use-package htmlize)
 
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -501,7 +438,6 @@
 	(evil-set-undo-system 'undo-tree)
   :config
 	;;(undo-history-directory-alist '(("." . "~/.backups/")))
-  (delete-old-versions t)
   (kept-new-versions 6)
   (kept-old-versions 2)
   :custom
@@ -531,11 +467,6 @@
   :config
     (setq toggle-term-size 25)
     (setq toggle-term-switch-upon-toggle t))
-
-;; (use-package dired-preview
-;; 	:init
-;; 	(dired-preview-global-mode 1)
-;; 	)
 
 (use-package zoxide
 	:general
@@ -579,90 +510,22 @@
 	)
 
 (use-package envrc
+  :diminish envrc-mode
 	:hook (after-init . envrc-global-mode))
-
-(use-package erlang)
-
-(use-package erlang-mode
-	:defer t
-  :mode ("\\.erl?$" . erlang-mode)
-)
 
 (use-package rustic
   :defer t
   :mode ("\\.rs?$" . rustic-mode)
-  :config
-  (rustic-format-on-save t))
+)
 
 (use-package tree-sitter-indent)
 
-(add-to-list 'load-path "~/.emacs.d/gleam-mode")
-(load-library "gleam-mode")
+(use-package gleam-ts-mode
+  :load-path "~/.emacs.d/gleam-mode"
+  )
 
-;; (defun gleam-format-before-save ()
-;;   (interactive)
-;;   (when (eq major-mode 'gleam-mode) (gleam-format))
-;;   )
 (add-hook 'gleam-mode-hook
-          (lambda () (add-hook 'before-save-hook 'gleam-format nil t)))
-
-;; (add-hook 'before-save-hook 'gleam-format-before-save)
-
-;; (use-package exwm
-;;   :init
-;; (start-process-shell-command "xmodmap" nil "xmodmap ~/.emacs.d/exwm/Xmodmap")
-;;   :config
-;;   ;; Set the default number of workspaces
-;;   (setq exwm-workspace-number 5)
-
-;;   ;; When window "class" updates, use it to set the buffer name
-;;   ;; (add-hook 'exwm-update-class-hook #'efs/exwm-update-class)
-
-;;   ;; These keys should always pass through to Emacs
-;;   (setq exwm-input-prefix-keys
-;;     '(?\C-x
-;;       ?\C-u
-;;       ?\C-h
-;;       ?\M-x
-;;       ?\M-`
-;;       ?\M-&
-;;       ?\M-:
-;;       ?\C-\M-j  ;; Buffer list
-;;       ?\C-\ ))  ;; Ctrl+Space
-
-;;   ;; Ctrl+Q will enable the next key to be sent directly
-;;   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
-
-;;   ;; Set up global key bindings.  These always work, no matter the input state!
-;;   ;; Keep in mind that changing this list after EXWM initializes has no effect.
-;;   (setq exwm-input-global-keys
-;;         `(
-;;           ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
-;;           ([?\s-r] . exwm-reset)
-
-;;           ;; Move between windows
-;;           ([s-left] . windmove-left)
-;;           ([s-right] . windmove-right)
-;;           ([s-up] . windmove-up)
-;;           ([s-down] . windmove-down)
-
-;;           ;; Launch applications via shell command
-;;           ([?\s-&] . (lambda (command)
-;;                        (interactive (list (read-shell-command "$ ")))
-;;                        (start-process-shell-command command nil command)))
-
-;;           ;; Switch workspace
-;;           ([?\s-w] . exwm-workspace-switch)
-
-;;           ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
-;;           ,@(mapcar (lambda (i)
-;;                       `(,(kbd (format "s-%d" i)) .
-;;                         (lambda ()
-;;                           (interactive)
-;;                           (exwm-workspace-switch-create ,i))))
-;;                     (number-sequence 0 9))))
-
-;;   (exwm-enable))
+          (lambda () (add-hook 'before-save-hook 'gleam-ts-format nil t)))
 
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
   "Try to parse bytecode instead of json."
@@ -702,4 +565,5 @@
                                        ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++"))
   ;; Enables ligature checks globally in all buffers. You can also do it
   ;; per mode with `ligature-mode'.
+  :init
   (global-ligature-mode t))
