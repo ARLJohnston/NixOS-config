@@ -26,9 +26,15 @@
       url = "github:hyprwm/hyprland-plugins";
       inputs.hyprland.follows = "hyprland";
     };
+
+    plasma-manager = {
+      url = "github:nix-community/plasma-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, emacs-overlay, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, plasma-manager, emacs-overlay, ... }@inputs:
     let
       system = "x86_64-linux";
 
@@ -46,7 +52,9 @@
         alistair = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = { inherit inputs system; };
-          modules = [ ./nixos/home.nix ];
+          modules = [
+          inputs.plasma-manager.homeManagerModules.plasma-manager
+            ./nixos/home.nix ];
         };
       };
 

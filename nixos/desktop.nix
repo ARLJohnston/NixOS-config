@@ -7,23 +7,10 @@
     wofi
     swaybg
     swaylock
+    sddm
   ];
 
-  # services.xserver.displayManager.lightdm.enable = true;
-  # services.xserver.windowManager.exwm.enable = true;
-
   security.polkit.enable = true;
-
-  hardware.opengl = {
-    enable = true;
-    driSupport = true;
-  };
-
-  services.xserver = {
-    enable = true;
-    xkb.layout = "gb";
-    xkb.model = "thinkpad";
-  };
 
   services.greetd = {
     enable = true;

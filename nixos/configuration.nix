@@ -38,6 +38,13 @@
       allowed-users = [ "@wheel" ];
       experimental-features = [ "nix-command" "flakes" ];
       auto-optimise-store = true;
+
+      extra-substituters =
+        [ "https://cache.nixos.org/" "https://nix-community.cachix.org/" ];
+      extra-trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
     };
   };
 
@@ -61,8 +68,6 @@
     vlc
     zfs
     zfs-prune-snapshots
-
-    (aspellWithDicts (dicts: with dicts; [ en en-computers en-science ]))
   ];
 
   #virtualisation.virtualbox.host.enable = true;
@@ -77,44 +82,78 @@
   };
 
   nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [ "discord" "spotify" ];
+    builtins.elem (lib.getName pkg) [
+      "discord"
+      "spotify"
+      "steam"
+      "steam-original"
+      "steam-run"
+    ];
+
+  programs.steam = { enable = true; };
 
   users.users.alistair = {
     isNormalUser = true;
     extraGroups = [ "wheel" "video" "networkmanager" "docker" ];
 
     packages = with pkgs; [
-      whatsapp-for-linux
-      discord
+      (retroarch.override { cores = with libretro; [ desmume ]; })
+      calibre
       direnv
+      discord
       feh
+      ffmpeg_5-full
       firefox
       gh
       gnumake
+      openconnect
       teams-for-linux
       thunderbird
       unzip
-      openconnect
-      ffmpeg_5-full
-
-      (retroarch.override { cores = with libretro; [ desmume ]; })
-
-      #Programming languages
-      erlang_27
-      erlfmt
-      rebar3
-      go
-      gleam
-
-      cargo
-      rustc
-      rustfmt
-
-      ghc
+      whatsapp-for-linux
+      keepassxc
       godot_4
-      gparted
     ];
   };
+
+  services.syncthing = {
+    enable = true;
+    user = "alistair";
+    group = "users";
+    openDefaultPorts = true;
+    configDir = "/home/alistair/.config/syncthing";
+    dataDir = "/home/alistair";
+
+    settings = {
+      devices = {
+        "Pixel3XL" = {
+          id =
+            "JQQXONJ-3YPYW5X-YE7WM5Z-JNET5KV-LVBIRNS-2GUOSEB-GXLJTGG-WO5COQF";
+          introducer = true;
+        };
+      };
+      folders = {
+        "Default" = {
+          path = "/home/alistair/Sync";
+          devices = [ "Pixel3XL" ];
+        };
+        "Camera" = {
+          path = "/home/alistair/Camera";
+          devices = [ "Pixel3XL" ];
+        };
+      };
+    };
+  };
+
+  # services.create_ap = {
+  #   enable = true;
+  #   settings = {
+  #     INTERNET_IFACE = "wlp3s0";
+  #     WIFI_IFACE = "wlp3s0";
+  #     SSID = "IOT Experimental Network";
+  #     PASSPHRASE = ".knmh'>gH;y(hLA$@nAk";
+  #   };
+  # };
 
   services.xserver.excludePackages = with pkgs; [ xterm ];
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
@@ -123,7 +162,12 @@
   services.gvfs.enable = true;
   services.udisks2.enable = true;
 
-  hardware.opengl.enable = true;
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+  };
+
+  hardware.graphics.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
