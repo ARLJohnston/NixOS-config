@@ -89,7 +89,6 @@ in {
 
     extraConfig = ''
       bind=,Print,exec,grim -t png -g "$(slurp)" ~/Pictures/$(date +%Y-%m-%d_%H-%m-%s).png
-      windowrulev2 = bordercolor rgb(${config.colorScheme.palette.base01}) rgb(${config.colorScheme.palette.base0E}),fullscreen:1
     '';
 
     settings = {
@@ -113,17 +112,25 @@ in {
         allow_workspace_cycles = true;
       };
 
-      # cursor = {
-      #   inactive_timeout = 2;
-      #   hide_on_key_press = true;
-      # };
+      cursor = {
+        hide_on_key_press = true;
+      };
+
+      device = {
+        name = "tpps/2-ibm-trackpoint";
+        sensitivity = -0.3;
+      };
 
       input = {
         kb_layout = "gb";
         kb_options = "ctrl:nocaps";
       };
 
-      exec-once = [ "emacs --fg-daemon" "hyprctl setcursor Qogir 24" ];
+      exec-once = [
+        "swaylock -i ~/lock.png"
+        "emacs --fg-daemon"
+        "[workspace special:magic] keepassxc ~/Passwords.kbdx"
+      ];
 
       binde = [
         "$mod, H, resizeactive, -10 0"
@@ -134,6 +141,8 @@ in {
         ",XF86MonBrightnessUp, exec, brightnessctl set +5%"
         ",XF86MonBrightnessDown, exec, brightnessctl set 5%-"
       ];
+
+      bindm = [ "$mod, mouse:272, movewindow" "$mod, mouse:273, resizewindow" ];
 
       bind = [
         "$mod, W, exec, firefox"
@@ -186,7 +195,15 @@ in {
     };
   };
 
-  home.sessionVariables = { };
+  home.sessionVariables = {
+    NIXOS_OZONE_WL = 1;
+    MOZ_ENABLE_WAYLAND = 1;
+    XDG_CURRENT_DESKTOP = "Hyprland";
+    XDG_SESSION_DESKTOP = "Hyprland";
+    XDG_SESSION_TYPE = "wayland";
+    GDK_BACKEND = "wayland,x11";
+    QT_QPA_PLATFORM = "wayland";
+  };
 
   programs.home-manager.enable = true;
 }

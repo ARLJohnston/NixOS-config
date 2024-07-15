@@ -7,7 +7,6 @@
     wofi
     swaybg
     swaylock
-    sddm
   ];
 
   security.polkit.enable = true;

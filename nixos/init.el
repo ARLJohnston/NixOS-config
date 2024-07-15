@@ -425,6 +425,7 @@
   )
 	:bind
 	("M-RET" . eglot-code-actions)
+  ("M-r" . eglot-rename)
   :custom
   (gc-cons-threshold 100000000)
   (read-process-output-max (* 1024 1024)) ;; 1mb
@@ -439,10 +440,9 @@
 			    ))))
   :demand t
   :hook (eglot-managed-mode . (lambda ()
-
-	(setq-local completion-at-point-functions
-				(list (cape-capf-super
-					   #'eglot-completion-at-point #'yasnippet-capf)))))
+	  (setq-local completion-at-point-functions
+		  (list (cape-capf-super
+			   #'eglot-completion-at-point #'yasnippet-capf)))))
   :after yasnippet
 )
 
@@ -451,5 +451,3 @@
 	(global-eldoc-mode)
   :diminish eldoc-mode
   )
-
-
