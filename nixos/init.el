@@ -451,3 +451,6 @@
 	(global-eldoc-mode)
   :diminish eldoc-mode
   )
+
+(use-package protobuf-mode)
+(use-package yaml)

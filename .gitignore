@@ -15,6 +15,3 @@
 !nixos/*.nix
 !nixos/*.el
 !nixos/home_modules/*.nix
-
-!nixos/home_modules/firefox_css
-!nixos/home_modules/firefox_css/*.css
