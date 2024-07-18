@@ -27,19 +27,13 @@
       inputs.hyprland.follows = "hyprland";
     };
 
-    plasma-manager = {
-      url = "github:nix-community/plasma-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
   };
 
-  outputs = { self, nixpkgs, home-manager, plasma-manager, emacs-overlay, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, emacs-overlay, ... }@inputs:
     let
       system = "x86_64-linux";
 
       pkgs = import nixpkgs { inherit system; };
-
     in {
       nixosConfigurations = {
         thinkpad = nixpkgs.lib.nixosSystem {
@@ -52,11 +46,11 @@
         alistair = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = { inherit inputs system; };
-          modules = [
-          inputs.plasma-manager.homeManagerModules.plasma-manager
-            ./nixos/home.nix ];
+          modules = [ ./nixos/home.nix ];
         };
       };
 
+      devShells.${system}.default =
+        pkgs.mkShell { nativeBuildInputs = with pkgs; [ nixpkgs-fmt nixfmt ]; };
     };
 }

@@ -425,7 +425,7 @@
   )
 	:bind
 	("M-RET" . eglot-code-actions)
-  ("M-r" . eglot-rename)
+	("M-r" . eglot-rename)
   :custom
   (gc-cons-threshold 100000000)
   (read-process-output-max (* 1024 1024)) ;; 1mb
@@ -443,14 +443,21 @@
 	  (setq-local completion-at-point-functions
 		  (list (cape-capf-super
 			   #'eglot-completion-at-point #'yasnippet-capf)))))
-  :after yasnippet
-)
+  :after yasnippet)
 
 (use-package eldoc
 	:init
 	(global-eldoc-mode)
-  :diminish eldoc-mode
-  )
+  :diminish eldoc-mode)
 
 (use-package protobuf-mode)
 (use-package yaml)
+
+(use-package hotfuzz)
+
+(use-package orderless
+  :ensure t
+  :after hotfuzz
+  :custom
+  (completion-styles '(hotfuzz orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
