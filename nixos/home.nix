@@ -38,6 +38,7 @@ in {
 
   imports = [
     inputs.nix-colors.homeManagerModules.default
+    inputs.spicetify-nix.homeManagerModules.default
 
     ./home_modules/foot.nix
     ./home_modules/fzf.nix
@@ -45,24 +46,21 @@ in {
     ./home_modules/wofi.nix
     ./home_modules/mako.nix
     ./emacs.nix
-
-    spicetify-nix.homeManagerModule
-    {
-      programs.spicetify = {
-        enable = true;
-        theme = spicePkgs.themes.text;
-        colorScheme = "kanagawa";
-
-        enabledExtensions = with spicePkgs.extensions; [
-          fullAppDisplay
-          shuffle
-          adblock
-          hidePodcasts
-          keyboardShortcut
-        ];
-      };
-    }
+    ./home_modules/librewolf.nix
   ];
+
+  programs.spicetify =
+    let spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
+    in {
+      enable = true;
+      enabledExtensions = with spicePkgs.extensions; [
+        adblock
+        hidePodcasts
+        shuffle # shuffle+ (special characters are sanitized out of extension names)
+      ];
+      theme = spicePkgs.themes.catppuccin;
+      colorScheme = "mocha";
+    };
 
   home.packages = with pkgs; [ lsd tree zoxide pamixer brightnessctl ];
 
@@ -112,9 +110,7 @@ in {
         allow_workspace_cycles = true;
       };
 
-      cursor = {
-        hide_on_key_press = true;
-      };
+      cursor = { hide_on_key_press = true; };
 
       device = {
         name = "tpps/2-ibm-trackpoint";
@@ -145,7 +141,7 @@ in {
       bindm = [ "$mod, mouse:272, movewindow" "$mod, mouse:273, resizewindow" ];
 
       bind = [
-        "$mod, W, exec, firefox"
+        "$mod, W, exec, librewolf"
         "$mod, D, exec, wofi --show drun"
         "$mod, X, exec, ~/.config/rofi/powermenu.sh"
         "$mod, Q, killactive"
