@@ -38,7 +38,10 @@
 
       AHCI_RUNTIME_PM_ON_BAT = "auto";
 
-      DEVICES_TO_DISABLE_ON_STARTUP = "bluetooth wwan";
+      DEVICES_TO_DISABLE_ON_STARTUP = "wwan";
     };
   };
+  hardware.bluetooth.enable = true; # enables support for Bluetooth
+  hardware.bluetooth.powerOnBoot = true; # powers up the default Bluetooth controller on boot
+  services.blueman.enable = true;
 }
