@@ -219,8 +219,9 @@
 	(browse-url-browser-function 'eww-browse-url)
   (elfeed-search-filter "")
 	(elfeed-feeds
-		'(("https://xeiaso.net/blog.rss" nix)
+		'(("https://xeiaso.net/blog.rss" code)
 		 ("https://servo.org/blog/feed.xml" misc)
+     ("https://protesilaos.com/codelog.xml" emacs)
      ("https://blog.system76.com/rss.xml" misc)
 		 ("https://ferd.ca/feed.rss" misc)
 		 ("https://samoa.dcs.gla.ac.uk/events/rest/Feed/rss/123" research)
@@ -289,8 +290,6 @@
 	)
 
 (use-package org-auto-tangle
-	:config
-	(org-auto-tangle-default t)
 	:ensure t
 	:diminish org-auto-tangle-mode
 	:hook
@@ -451,7 +450,9 @@
   :diminish eldoc-mode)
 
 (use-package protobuf-mode)
-(use-package yaml)
+(use-package yaml-pro
+  :mode ("\\.yml\\'" . yaml-pro-ts-mode)
+  )
 
 (use-package hotfuzz)
 
@@ -461,3 +462,18 @@
   :custom
   (completion-styles '(hotfuzz orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
+
+(use-package terraform-mode)
+
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+        (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        (go "https://github.com/tree-sitter/tree-sitter-go")
+        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
+        (hcl "https://github.com/MichaHoffmann/tree-sitter-hcl")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        (make "https://github.com/alemuller/tree-sitter-make")
+        (python "https://github.com/tree-sitter/tree-sitter-python")
+        (toml "https://github.com/tree-sitter/tree-sitter-toml")
+        (yaml "https://github.com/ikatyang/tree-sitter-yaml")))

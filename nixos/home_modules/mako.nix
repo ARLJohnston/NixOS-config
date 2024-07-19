@@ -5,7 +5,7 @@
     borderColor = "#${config.colorScheme.palette.base0E}";
     textColor = "#${config.colorScheme.palette.base04}";
     layer = "overlay";
-    font = "JuliaMono Regular 10";
+    font = "Iosevka Comfy 10";
     defaultTimeout = 5000;
   };
 }

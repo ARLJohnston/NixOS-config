@@ -11,16 +11,17 @@ let
         all-the-icons
         all-the-icons-completion
         all-the-icons-dired
-				imenu-list
+        imenu-list
         ligature
-				envrc
-				kind-icon
+        envrc
+        kind-icon
         org
         org-auto-tangle
-				pdf-tools
-        tree-sitter-indent
-				yasnippet-capf
+        pdf-tools
+        yasnippet-capf
+        treesit-grammars.with-all-grammars
         vterm
+        yaml-pro
       ];
     override = final: prev: { NIX_CFLAGS_COMPILE = [ "-O3" "-march=native" ]; };
   });
@@ -38,9 +39,7 @@ in {
     enchant
   ];
 
-  home.file = {
-    ".emacs" = { source = ./init.el; };
-  };
+  home.file = { ".emacs" = { source = ./init.el; }; };
 
   services = {
     emacs = {
