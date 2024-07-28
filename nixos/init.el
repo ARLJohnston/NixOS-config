@@ -80,6 +80,12 @@
     "C-o" 'casual-dired-tmenu
     "q" 'kill-this-buffer
   )
+
+  (general-define-key
+   :states '(visual)
+    "u" 'evil-undo
+    "r" 'evil-redo
+  )
   :diminish visual-line-mode
   :after general
 )
@@ -343,6 +349,7 @@
 	(evil-set-undo-system 'undo-tree)
   :custom
   (undo-tree-history-directory-alist '(("." . "~/.backups")))
+  (undo-tree-enable-undo-in-region t)
 	:ensure t
 	:diminish undo-tree-mode
 	:after evil)
@@ -416,7 +423,9 @@
   )
 
 (use-package eglot
-	:hook (prog-mode . eglot-ensure)
+	:hook
+  (prog-mode . eglot-ensure)
+  (yaml-ts-mode . eglot-ensure)
   :general
   (rune/leader-keys
    :keymaps 'prog-mode-map
@@ -449,8 +458,11 @@
 	(global-eldoc-mode)
   :diminish eldoc-mode)
 
-(use-package protobuf-mode)
+(use-package protobuf-mode
+  :ensure t)
+
 (use-package yaml-pro
+  :ensure t
   :mode ("\\.yml\\'" . yaml-pro-ts-mode)
   )
 
@@ -463,17 +475,49 @@
   (completion-styles '(hotfuzz orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(use-package terraform-mode)
+(use-package terraform-mode
+  :ensure t)
 
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-        (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
-        (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-        (go "https://github.com/tree-sitter/tree-sitter-go")
-        (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
-        (hcl "https://github.com/MichaHoffmann/tree-sitter-hcl")
-        (json "https://github.com/tree-sitter/tree-sitter-json")
-        (make "https://github.com/alemuller/tree-sitter-make")
-        (python "https://github.com/tree-sitter/tree-sitter-python")
-        (toml "https://github.com/tree-sitter/tree-sitter-toml")
-        (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+(use-package treesit
+  :ensure nil
+  :mode
+  ("\\.yaml\\'" . yaml-ts-mode)
+  ("\\.yml\\'" . yaml-ts-mode)
+  ("\\.toml\\'" . toml-ts-mode)
+  ("\\.jsonrc\\'" . json-ts-mode)
+
+  :custom
+  (treesit-font-lock-level 4)
+  (treesit-font-lock-feature-list t)
+  (standard-indent 2)
+  (major-mode-remap-alist
+   '((c-mode . c-ts-mode)
+     (python-mode . python-ts-mode)
+     (julia-mode . ess-julia-mode)
+     (sh-mode . bash-ts-mode)
+     (rust-mode . rust-ts-mode)
+     (toml-mode . toml-ts-mode)
+     (yaml-mode . yaml-ts-mode))))
+
+
+(use-package transient
+  :ensure t
+  :init
+  (transient-define-prefix go-transient()
+    "Prefix that is minimal and uses an anonymous command suffix."
+    [
+     ("t" "Tidy"
+      (lambda ()
+        (interactive)
+        (async-shell-command "go mod tidy")))
+
+     ("v" "Vet"
+      (lambda ()
+				(interactive)
+				(async-shell-command "go vet")))
+     ])
+  :general
+  (rune/leader-keys
+    :keymaps 'go-mode-map
+    "g" #'(lambda () (interactive) (go-transient)))
+)
