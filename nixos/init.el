@@ -41,7 +41,14 @@
 	(default-tab-width 2)
 	(warning-minimum-level :error)
 	:init
-	(set-face-attribute 'default nil :font "Iosevka Comfy")
+  (set-face-attribute 'default nil
+                    :family "Hasklig"
+                    ;; :height 200
+                    :weight 'normal
+                    :width 'normal)
+
+(use-package hasklig-mode
+  :hook (haskell-mode))
 
 	(tool-bar-mode -1)
 	(menu-bar-mode -1)
@@ -83,8 +90,8 @@
 
   (general-define-key
    :states '(visual)
-    "u" 'evil-undo
-    "r" 'evil-redo
+    "u" 'undo-only
+    "r" 'undo-redo
   )
   :diminish visual-line-mode
   :after general
@@ -188,24 +195,11 @@
 )
 
 (use-package cape
-  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-  ;; Press C-c p ? to for help.
   :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
-  ;; Alternatively bind Cape commands individually.
-  ;; :bind (("C-c p d" . cape-dabbrev)
-  ;;        ("C-c p h" . cape-history)
-  ;;        ("C-c p f" . cape-file)
-  ;;        ...)
   :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-  ;; ...
 )
 
 (use-package yasnippet-capf
@@ -226,6 +220,7 @@
   (elfeed-search-filter "")
 	(elfeed-feeds
 		'(("https://xeiaso.net/blog.rss" code)
+     ("https://fly.io/blog/feed.xml" code)
 		 ("https://servo.org/blog/feed.xml" misc)
      ("https://protesilaos.com/codelog.xml" emacs)
      ("https://blog.system76.com/rss.xml" misc)
@@ -346,7 +341,6 @@
 (use-package undo-tree
 	:init
 	(global-undo-tree-mode 1)
-	(evil-set-undo-system 'undo-tree)
   :custom
   (undo-tree-history-directory-alist '(("." . "~/.backups")))
   (undo-tree-enable-undo-in-region t)
@@ -375,7 +369,7 @@
 	:ensure t
   :general
   (rune/leader-keys
-   "m" 'magit)
+   "m" 'magit-status)
 	)
 
 (use-package pdf-tools
@@ -404,15 +398,19 @@
 	:hook (after-init . envrc-global-mode))
 
 (use-package ligature
+  :after emacs
   :config
   ;; Enable all Iosevka ligatures in programming modes
-  (ligature-set-ligatures 'prog-mode '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
-                                       "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
-                                       "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
-                                       ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++"))
-  ;; Enables ligature checks globally in all buffers. You can also do it
-  ;; per mode with `ligature-mode'.
-  :hook (prog-mode . ligature-mode)
+  (ligature-set-ligatures 'prog-mode '(
+"<*" "<*>" "<+>" "<$>" "***"
+"<|" "|>" "<|>" "!!" "||"
+"===" "==>" "<<<" ">>>" "<>"
+"+++" "<-" "->" "=>" ">>"
+"<<" ">>=" "=<<" ".." "..."
+"::" "-<" ">-" "-<<" ">>-"
+"++" "/=" "=="
+				       ))
+  (global-ligature-mode)
   )
 
 (use-package docker
@@ -464,7 +462,7 @@
 (use-package yaml-pro
   :ensure t
   :mode ("\\.yml\\'" . yaml-pro-ts-mode)
-  )
+)
 
 (use-package hotfuzz)
 
@@ -492,6 +490,7 @@
   (standard-indent 2)
   (major-mode-remap-alist
    '((c-mode . c-ts-mode)
+     (go-mode . go-ts-mode)
      (python-mode . python-ts-mode)
      (julia-mode . ess-julia-mode)
      (sh-mode . bash-ts-mode)
@@ -504,7 +503,6 @@
   :ensure t
   :init
   (transient-define-prefix go-transient()
-    "Prefix that is minimal and uses an anonymous command suffix."
     [
      ("t" "Tidy"
       (lambda ()
@@ -515,9 +513,22 @@
       (lambda ()
 				(interactive)
 				(async-shell-command "go vet")))
+
+     ("s" "Package Search"
+      (lambda ()
+				(interactive)
+				(other-window-prefix)
+	      (eww (concat '"https://pkg.go.dev/search?q=" (read-string "Enter Package Name:"))))
+      )
      ])
   :general
   (rune/leader-keys
     :keymaps 'go-mode-map
     "g" #'(lambda () (interactive) (go-transient)))
 )
+
+(set-face-attribute 'default nil
+                  :family "Hasklig"
+                  ;; :height 200
+                  :weight 'normal
+                  :width 'normal)

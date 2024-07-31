@@ -12,6 +12,7 @@ let
         all-the-icons-completion
         all-the-icons-dired
         imenu-list
+        jinx
         ligature
         envrc
         kind-icon
@@ -33,6 +34,7 @@ in {
     python3
     emacs-all-the-icons-fonts
     nuspell
+    hasklig
 
     (aspellWithDicts (dicts: with dicts; [ en en-computers ]))
     my_emacs
