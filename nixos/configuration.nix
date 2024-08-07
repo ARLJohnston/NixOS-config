@@ -70,6 +70,16 @@
     zfs-prune-snapshots
   ];
 
+  fonts.packages = with pkgs; [
+    cascadia-code
+    fira-code-nerdfont
+    emacs-all-the-icons-fonts
+  ];
+
+  fonts.fontconfig = {
+    enable = true;
+    defaultFonts = { monospace = [ "Cascadia Code" ]; };
+  };
   #virtualisation.virtualbox.host.enable = true;
   #virtualisation.virtualbox.guest.enable = true;
   # users.extraGroups.vboxusers.members = [ "alistair" ];
@@ -102,7 +112,7 @@
       direnv
       discord
       feh
-      ffmpeg_5-full
+      jellyfin-ffmpeg
       firefox
       gh
       gnumake
@@ -128,7 +138,7 @@
       devices = {
         "Pixel3XL" = {
           id =
-            "JQQXONJ-3YPYW5X-YE7WM5Z-JNET5KV-LVBIRNS-2GUOSEB-GXLJTGG-WO5COQF";
+            "I6A3YY6-7RNPXIN-2BZG62F-AGET2PC-57ND5V4-QLGBYWN-LNZ7MPY-P2C7FQM";
           introducer = true;
         };
       };
@@ -165,6 +175,11 @@
   services.avahi = {
     enable = true;
     nssmdns4 = true;
+    publish = {
+      enable = true;
+      domain = true;
+      userServices = true;
+    };
   };
 
   hardware.graphics.enable = true;

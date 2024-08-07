@@ -1,7 +1,6 @@
-{ pkgs, ... }:
-{
+{ pkgs, ... }: {
   services.auto-cpufreq = {
-    enable = true;
+    enable = false;
     settings = {
       battery = {
         governor = "powersave";
@@ -17,7 +16,7 @@
   services.thermald.enable = true;
 
   services.tlp = {
-    enable = true;
+    enable = false;
     settings = {
       RUNTIME_PM_ON_AC = "on";
       RUNTIME_PM_ON_BAT = "auto";
@@ -42,6 +41,7 @@
     };
   };
   hardware.bluetooth.enable = true; # enables support for Bluetooth
-  hardware.bluetooth.powerOnBoot = true; # powers up the default Bluetooth controller on boot
+  hardware.bluetooth.powerOnBoot =
+    true; # powers up the default Bluetooth controller on boot
   services.blueman.enable = true;
 }

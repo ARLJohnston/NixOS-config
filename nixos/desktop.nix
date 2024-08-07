@@ -11,6 +11,8 @@
 
   security.polkit.enable = true;
 
+  # services.desktopManager.cosmic.enable = true;
+  # services.displayManager.cosmic-greeter.enable = true;
   services.greetd = {
     enable = true;
     settings = rec {

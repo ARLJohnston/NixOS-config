@@ -31,9 +31,14 @@
       url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-cosmic = {
+      url = "github:lilyinstarlight/nixos-cosmic";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, emacs-overlay, ... }@inputs:
+  outputs =
+    { self, nixpkgs, home-manager, emacs-overlay, nixos-cosmic, ... }@inputs:
     let
       system = "x86_64-linux";
 
@@ -42,7 +47,18 @@
       nixosConfigurations = {
         thinkpad = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs system; };
-          modules = [ ./nixos/configuration.nix ];
+          modules = [
+            {
+              nix.settings = {
+                substituters = [ "https://cosmic.cachix.org/" ];
+                trusted-public-keys = [
+                  "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
+                ];
+              };
+            }
+            ./nixos/configuration.nix
+            nixos-cosmic.nixosModules.default
+          ];
         };
       };
 
@@ -55,7 +71,7 @@
       };
 
       devShells.${system}.default = pkgs.mkShell {
-        nativeBuildInputs = with pkgs; [ nixpkgs-fmt nixfmt nil ];
+        nativeBuildInputs = with pkgs; [ nixpkgs-fmt nixfmt nixd ];
       };
     };
 }

@@ -19,7 +19,14 @@
         ];
 
         search.engines = {
-          "Home Manager NixOs" = {
+          "Scholar" = {
+            urls = [{
+              template = "https://scholar.google.com/scholar?q={searchTerms}";
+            }];
+            definedAliases = [ "@s" ];
+          };
+
+          "Home Manager" = {
             urls = [{
               template = "https://home-manager-options.extranix.com/";
               params = [{
