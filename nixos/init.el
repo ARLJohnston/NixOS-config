@@ -41,15 +41,6 @@
 	(default-tab-width 2)
 	(warning-minimum-level :error)
 	:init
-  (set-face-attribute 'default nil
-                    :family "Hasklig"
-                    ;; :height 200
-                    :weight 'normal
-                    :width 'normal)
-
-(use-package hasklig-mode
-  :hook (haskell-mode))
-
 	(tool-bar-mode -1)
 	(menu-bar-mode -1)
 	(scroll-bar-mode -1)
@@ -397,22 +388,6 @@
 (use-package envrc
 	:hook (after-init . envrc-global-mode))
 
-(use-package ligature
-  :after emacs
-  :config
-  ;; Enable all Iosevka ligatures in programming modes
-  (ligature-set-ligatures 'prog-mode '(
-"<*" "<*>" "<+>" "<$>" "***"
-"<|" "|>" "<|>" "!!" "||"
-"===" "==>" "<<<" ">>>" "<>"
-"+++" "<-" "->" "=>" ">>"
-"<<" ">>=" "=<<" ".." "..."
-"::" "-<" ">-" "-<<" ">>-"
-"++" "/=" "=="
-				       ))
-  (global-ligature-mode)
-  )
-
 (use-package docker
   :ensure t
   :general
@@ -514,6 +489,11 @@
 				(interactive)
 				(async-shell-command "go vet")))
 
+     ("d" "Doc"
+      (lambda ()
+				(interactive)
+				(godoc)))
+
      ("s" "Package Search"
       (lambda ()
 				(interactive)
@@ -527,8 +507,42 @@
     "g" #'(lambda () (interactive) (go-transient)))
 )
 
-(set-face-attribute 'default nil
-                  :family "Hasklig"
-                  ;; :height 200
-                  :weight 'normal
-                  :width 'normal)
+(use-package ligature
+  :config
+  (ligature-set-ligatures 'prog-mode '("-->" "->" "->>" "-<" "--<"
+                                       "-~" "]#" ".-" "!=" "!=="
+                                       "#(" "#{" "#[" "#_" "#_("
+                                       "/=" "/==" "|||" "||" ;; "|"
+                                       "==" "===" "==>" "=>" "=>>"
+                                       "=<<" "=/" ">-" ">->" ">="
+                                       ">=>" "<-" "<--" "<->" "<-<"
+                                       "<!--" "<|" "<||" "<|||"
+                                       "<|>" "<=" "<==" "<==>" "<=>"
+                                       "<=<" "<<-" "<<=" "<~" "<~>"
+                                       "<~~" "~-" "~@" "~=" "~>"
+                                       "~~" "~~>" ".=" "..=" "---"
+                                       "{|" "[|" ".."  "..."  "..<"
+                                       ".?"  "::" ":::" "::=" ":="
+                                       ":>" ":<" ";;" "!!"  "!!."
+                                       "!!!"  "?."  "?:" "??"  "?="
+                                       "**" "***" "*>" "*/" "#:"
+                                       "#!"  "#?"  "##" "###" "####"
+                                       "#=" "/*" "/>" "//" "///"
+                                       "&&" "|}" "|]" "$>" "++"
+                                       "+++" "+>" "=:=" "=!=" ">:"
+                                       ">>" ">>>" "<:" "<*" "<*>"
+                                       "<$" "<$>" "<+" "<+>" "<>"
+                                       "<<" "<<<" "</" "</>" "^="
+                                       "%%" "'''" "\"\"\"" ))
+  ;; Enables ligature checks globally in all buffers. You can also do it
+  ;; per mode with `ligature-mode'.
+  (global-ligature-mode t))
+
+(add-to-list 'default-frame-alist
+             '(font . "MonoLisa Nerd Font"))
+
+  (set-face-attribute 'default nil
+                    :family "MonoLisa Nerd Font"
+                    ;; :height 200
+                    :weight 'normal
+                    :width 'normal)

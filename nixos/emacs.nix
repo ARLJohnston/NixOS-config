@@ -3,24 +3,28 @@ let
   my_emacs = (pkgs.emacsWithPackagesFromUsePackage {
     package = pkgs.emacs;
     config = ./init.el;
-    defaultInitFile = true;
-    alwaysEnsure = true;
+    # defaultInitFile = true;
+    alwaysEnsure = false;
 
     extraEmacsPackages = epkgs:
       with epkgs; [
         all-the-icons
         all-the-icons-completion
         all-the-icons-dired
+        evil
         imenu-list
         jinx
         ligature
         envrc
         kind-icon
         org
+        org-alert
         org-auto-tangle
         pdf-tools
         yasnippet-capf
         treesit-grammars.with-all-grammars
+        use-package
+        bind-key
         vterm
         yaml-pro
       ];
@@ -32,9 +36,7 @@ in {
     texliveMedium
     tree-sitter
     python3
-    emacs-all-the-icons-fonts
     nuspell
-    hasklig
 
     (aspellWithDicts (dicts: with dicts; [ en en-computers ]))
     my_emacs
@@ -48,6 +50,7 @@ in {
       enable = true;
       client.enable = true;
       defaultEditor = true;
+      socketActivation.enable = true;
     };
   };
 
