@@ -124,7 +124,7 @@ in {
 
       exec-once = [
         "swaylock -i ~/lock.png"
-        "emacs --fg-daemon"
+        # "emacs --fg-daemon"
         "[workspace special:magic] keepassxc ~/Passwords.kbdx"
       ];
 
