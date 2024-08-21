@@ -18,6 +18,11 @@
           consent-o-matic
         ];
 
+        search = {
+          default = "DuckDuckGo";
+          force = true;
+        };
+
         search.engines = {
           "Scholar" = {
             urls = [{
@@ -123,8 +128,11 @@
           "layers.gpu-process.enabled" = true;
           "layers.mlgpu.enabled" = true;
           "media.ffmpeg.vaapi.enabled" = true;
+          "media.rdd-vpx.enabled" = true; # enable hardware acceleration
           "media.gpu-process-decoder" = true;
           "media.hardware-video-decoding.enabled" = true;
+          "browser.startup.page" = 3; # restore previous session
+
         };
 
         extraConfig = ''

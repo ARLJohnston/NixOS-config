@@ -12,10 +12,14 @@
 			(eval-print-last-sexp)))
 	(load bootstrap-file nil 'nomessage))
 
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+(use-package org)
+
 (use-package general
   :config
   (general-evil-setup t)
-  ;;(general-auto-unbind-keys)
+  (general-auto-unbind-keys)
 
   (general-create-definer rune/leader-keys
     :states '(normal visual motion emacs insert)
@@ -31,10 +35,7 @@
 	(native-comp-speed 3)
 	(ring-bell-function 'ignore)
 	(initial-scratch-message 'nil)
-;; Emacs 28 and newer: Hide commands in M-x which do not work in the current mode
 	(read-extended-command-predicate #'command-completion-default-include-p)
-	;; (backup-directory-alist '((".*" . "~/.backups/")))
-;; Less Jumpy scrolling
 	(scroll-step 1)
 	(scroll-margin 4)
 	(display-line-numbers-type 'relative)
@@ -51,6 +52,7 @@
 	(display-battery-mode)
   (setq global-auto-revert-non-file-buffers t)
 	;;(electric-indent-mode -1)
+  (text-mode-ispell-word-completion nil)
 
 	(winner-mode 1)
 	(global-visual-line-mode)
@@ -68,7 +70,12 @@
     "bi" 'recentf
     "r" 'switch-to-buffer
     "w" (general-simulate-key "C-w")
-    "SPC" 'find-file)
+    "oa" 'org-agenda
+    "SPC" 'find-file
+    "ni" 'org-roam-node-insert
+    "ou" 'org-roam-ui-open
+    "or" (find-file "~/org/main.org")
+    )
 
   (general-define-key
    :states '(normal)
@@ -81,8 +88,8 @@
 
   (general-define-key
    :states '(visual)
-    "u" 'undo-only
-    "r" 'undo-redo
+    "u" 'undo-fu-only-undo
+    "r" 'undo-fu-only-redo
   )
   :diminish visual-line-mode
   :after general
@@ -94,6 +101,10 @@
    :states '(insert normal motion visual)
    "C-f" 'avy-goto-char
    "C-t" 'avy-goto-char-timer)
+
+  (general-define-key
+   :states '(normal motion visual)
+   "s" 'avy-goto-char)
 
   (rune/leader-keys
     "f" 'avy-goto-char)
@@ -186,10 +197,12 @@
 )
 
 (use-package cape
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative keys: M-p, M-+, ...
+  :bind ("C-c p" . cape-prefix-map)
   :init
+  (setq cape-dict-file "~/config/emacs/dictionary.dic")
   (add-hook 'completion-at-point-functions #'cape-dabbrev)
   (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-dict)
   (add-hook 'completion-at-point-functions #'cape-elisp-block)
 )
 
@@ -222,16 +235,12 @@
   (rune/leader-keys
     "e" #'(lambda () (interactive) (elfeed-update) (elfeed))
     )
-  (general-define-key
+  (rune/leader-keys
    :keymaps 'eww-mode-map
-   "C-y" 'eww-copy-page-url
+   "y" 'eww-copy-page-url
    )
 	:defer t
 )
-
-(use-package markdown-mode
-	:defer t
-	)
 
 (use-package nix-mode
   :init
@@ -252,47 +261,49 @@
 	:diminish yas-minor-mode
 	)
 
-(use-package org
-	:custom
-	(org-src-preserve-indentation t)
-	(org-todo-keywords
-			'((sequence "TODO" "IN-PROGRESS" "DONE")))
-	(org-clock-in-switch-to-state "IN-PROGRESS")
+(use-package org-roam)
+(use-package org-roam-ui)
+(use-package org-roam-bibtex
+  :straight t
+  :after org-roam)
 
-  (defun org-agenda-sort-at-point ()
-	  (interactive)
-	  (org-sort-entries nil ?o)
-	  (org-sort-entries nil ?o))
+;; (use-package org-auto-tangle
+;; 	:ensure t
+;; 	:diminish org-auto-tangle-mode
+;; 	:hook
+;; 	(org-mode . org-auto-tangle-mode)
+;; 	)
 
-  (defun org-agenda-sort-headers ()
-    "Sort each header in the current buffer."
-    (interactive)
-    (org-map-entries (lambda () (org-sort-entries nil ?o)) nil 'tree))
-
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory "~/org")
+  (org-agenda-files (list "~/org/"))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert))
+  :config
+  (org-roam-setup)
   :general
   (rune/leader-keys
     :keymaps 'org-mode-map
+		"ci" 'org-clock-in
 		"co" 'org-clock-out
 		"cu" 'org-clock-update-time-maybe
-		"cs" 'org-agenda-sort-at-point
+    "nf" 'org-roam-node-find
+    "nt" 'org-roam-buffer-toggle
   )
-	:ensure t
-	:hook
-  (before-save-hook . #'org-agenda-sort-headers)
-	)
+  )
 
-(use-package org-auto-tangle
-	:ensure t
-	:diminish org-auto-tangle-mode
-	:hook
-	(org-mode . org-auto-tangle-mode)
-	)
+(use-package ob-mermaid
+  :straight t)
 
 (org-babel-do-load-languages
  'org-babel-load-languages
  '(
 	 (emacs-lisp . t)
 	 (haskell . t)
+   (mermaid . t)
 	 (java . t)
 	 ))
 
@@ -309,11 +320,21 @@
 	(marginalia-mode-hook . all-the-icons-completion-marginalia-setup)
 )
 
+(use-package undo-fu
+  :init
+  (setq undo-limit 67108864) ; 64mb.
+  (setq undo-strong-limit 100663296) ; 96mb.
+  (setq undo-outer-limit 1006632960) ; 960mb.
+  )
+
+(use-package vundo)
+
 (use-package evil
 	:custom
 	(evil-want-integration t)
 	(evil-want-keybinding nil)
   (evil-want-C-u-scroll t)
+  (evil-undo-system 'undo-fu)
 	:config
 	(evil-mode 1)
 	:hook
@@ -329,32 +350,17 @@
   :after evil
 	)
 
-(use-package undo-tree
-	:init
-	(global-undo-tree-mode 1)
-  :custom
-  (undo-tree-history-directory-alist '(("." . "~/.backups")))
-  (undo-tree-enable-undo-in-region t)
-	:ensure t
-	:diminish undo-tree-mode
-	:after evil)
+;; Use nix to install as don't want CMake
+;; (use-package vterm
+;; 	:ensure t)
+;
+;; (use-package vterm-toggle
+;;   :ensure t
+;;   )
 
-(use-package vterm
-	:ensure t)
-
-(use-package vterm-toggle
-  :init
-	(keymap-global-set "s-<return>" 'vterm-toggle)
-  :ensure t
-  )
+(keymap-global-set "s-<return>" 'vterm-toggle)
 (keymap-global-set "s-c" 'calc)
 (keymap-global-set "C-c C-c" 'compile)
-
-(use-package zoxide
-	:general
-	(rune/leader-keys
-    "." 'zoxide-travel-with-query)
-	)
 
 (use-package magit
 	:ensure t
@@ -376,16 +382,12 @@
   :mode ("\\.go?$" . go-mode)
 	:custom
 	(compile-command "go test -v")
-	:hook
-	(before-save . gofmt-before-save)
-	:defer t
-	)
+	:defer t)
 
-(use-package gorepl-mode
-  :hook
-  (go-mode . gorepl-mode))
+(add-hook 'before-save-hook 'gofmt-before-save)
 
 (use-package envrc
+  :ensure t
 	:hook (after-init . envrc-global-mode))
 
 (use-package docker
@@ -410,6 +412,8 @@
   :custom
   (gc-cons-threshold 100000000)
   (read-process-output-max (* 1024 1024)) ;; 1mb
+  (eglot-autoshutdown t) ; shutdown after closing the last managed buffer
+  (eglot-sync-connect 0) ; async, do not block
   :config
     (setq-default eglot-workspace-configuration
 		'((:gopls .
@@ -431,53 +435,45 @@
 	(global-eldoc-mode)
   :diminish eldoc-mode)
 
-(use-package protobuf-mode
-  :ensure t)
-
 (use-package yaml-pro
   :ensure t
   :mode ("\\.yml\\'" . yaml-pro-ts-mode)
 )
 
-(use-package hotfuzz)
-
 (use-package orderless
   :ensure t
-  :after hotfuzz
   :custom
-  (completion-styles '(hotfuzz orderless basic))
+  (completion-styles '(flex orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
 (use-package terraform-mode
   :ensure t)
 
-(use-package treesit
-  :ensure nil
-  :mode
-  ("\\.yaml\\'" . yaml-ts-mode)
-  ("\\.yml\\'" . yaml-ts-mode)
-  ("\\.toml\\'" . toml-ts-mode)
-  ("\\.jsonrc\\'" . json-ts-mode)
+;; (use-package treesit
+;;   :ensure nil
+;;   :mode
+;;   ("\\.yaml\\'" . yaml-ts-mode)
+;;   ("\\.yml\\'" . yaml-ts-mode)
+;;   ("\\.toml\\'" . toml-ts-mode)
+;;   ("\\.jsonrc\\'" . json-ts-mode)
 
-  :custom
-  (treesit-font-lock-level 4)
-  (treesit-font-lock-feature-list t)
-  (standard-indent 2)
-  (major-mode-remap-alist
-   '((c-mode . c-ts-mode)
-     (go-mode . go-ts-mode)
-     (python-mode . python-ts-mode)
-     (julia-mode . ess-julia-mode)
-     (sh-mode . bash-ts-mode)
-     (rust-mode . rust-ts-mode)
-     (toml-mode . toml-ts-mode)
-     (yaml-mode . yaml-ts-mode))))
-
+;;   :custom
+;;   (treesit-font-lock-level 4)
+;;   (treesit-font-lock-feature-list t)
+;;   (standard-indent 2)
+;;   (major-mode-remap-alist
+;;    '((c-mode . c-ts-mode)
+;;      (python-mode . python-ts-mode)
+;;      (julia-mode . ess-julia-mode)
+;;      (sh-mode . bash-ts-mode)
+;;      (rust-mode . rust-ts-mode)
+;;      (toml-mode . toml-ts-mode)
+;;      (yaml-mode . yaml-ts-mode))))
 
 (use-package transient
   :ensure t
   :init
-  (transient-define-prefix go-transient()
+  (transient-define-prefix go-transient ()
     [
      ("t" "Tidy"
       (lambda ()
@@ -503,7 +499,6 @@
      ])
   :general
   (rune/leader-keys
-    :keymaps 'go-mode-map
     "g" #'(lambda () (interactive) (go-transient)))
 )
 
@@ -512,7 +507,7 @@
   (ligature-set-ligatures 'prog-mode '("-->" "->" "->>" "-<" "--<"
                                        "-~" "]#" ".-" "!=" "!=="
                                        "#(" "#{" "#[" "#_" "#_("
-                                       "/=" "/==" "|||" "||" ;; "|"
+                                       "/=" "/==" "|||" "||" ; "|"
                                        "==" "===" "==>" "=>" "=>>"
                                        "=<<" "=/" ">-" ">->" ">="
                                        ">=>" "<-" "<--" "<->" "<-<"
@@ -539,10 +534,10 @@
   (global-ligature-mode t))
 
 (add-to-list 'default-frame-alist
-             '(font . "MonoLisa Nerd Font"))
+             '(font . "MonoLisa Nerd Font-10"))
 
   (set-face-attribute 'default nil
                     :family "MonoLisa Nerd Font"
                     ;; :height 200
                     :weight 'normal
-                    :width 'normal)
+                    :width 'condensed)
