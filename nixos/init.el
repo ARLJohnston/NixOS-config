@@ -14,6 +14,7 @@
 
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
+
 (use-package org)
 
 (use-package general
@@ -27,8 +28,7 @@
     :prefix "SPC"
     :global-prefix "C-SPC")
   :ensure t
-  :demand t
-  )
+  :demand t)
 
 (use-package emacs
 	:custom
@@ -41,6 +41,7 @@
 	(display-line-numbers-type 'relative)
 	(default-tab-width 2)
 	(warning-minimum-level :error)
+  (default-frame-alist '((undecorated . t)))
 	:init
 	(tool-bar-mode -1)
 	(menu-bar-mode -1)
@@ -69,12 +70,14 @@
 		"bm" 'buffer-menu
     "bi" 'recentf
     "r" 'switch-to-buffer
+    "s" 'project-switch-to-buffer
+    "a" 'project-async-shell-command
     "w" (general-simulate-key "C-w")
     "oa" 'org-agenda
     "SPC" 'find-file
     "ni" 'org-roam-node-insert
     "ou" 'org-roam-ui-open
-    "or" (find-file "~/org/main.org")
+    "or" #'(lambda () (interactive) (find-file "~/org/main.org"))
     )
 
   (general-define-key
@@ -88,7 +91,7 @@
 
   (general-define-key
    :states '(visual)
-    "u" 'undo-fu-only-undo
+    "u" 'undo
     "r" 'undo-fu-only-redo
   )
   :diminish visual-line-mode
@@ -113,8 +116,7 @@
 (use-package doom-themes
   :ensure t
   :config
-  (load-theme 'doom-monokai-ristretto t)
-  )
+  (load-theme 'doom-monokai-ristretto t))
 
 (use-package whitespace
   :init
@@ -160,10 +162,10 @@
 (use-package imenu-list
 	:config
 	(imenu-list-focus-after-activation t)
-  :general
-  (rune/leader-keys
-	"si" 'imenu-list-smart-toggle
-  )
+  ;; :general
+  ;; (rune/leader-keys
+	;; "si" 'imenu-list-smart-toggle
+  ;; )
 )
 
 ;;Better autocomplete
@@ -261,7 +263,6 @@
 	:diminish yas-minor-mode
 	)
 
-(use-package org-roam)
 (use-package org-roam-ui)
 (use-package org-roam-bibtex
   :straight t
@@ -278,7 +279,21 @@
   :ensure t
   :custom
   (org-roam-directory "~/org")
+  (org-roam-complete-everywhere t)
   (org-agenda-files (list "~/org/"))
+  (org-roam-capture-templates
+   '(
+     ("d" "default" plain
+      "%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+
+   ("m" "mermaid" plain
+      "%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n #+STARTUP: inlineimages\n\n #+begin_src mermaid :file ${slug}.png\n flowchart TD\n A[Christmas] -->|Get money| B(Go shopping)\n B --> C{Let me think}\n C -->|One| D[Laptop]\n C -->|Two| E[iPhone]\n C -->|Three| F[fa:fa-car Car]\n #+end_src")
+      :unnarrowed t)
+     )
+   )
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
          ("C-c n i" . org-roam-node-insert))
@@ -293,9 +308,12 @@
     "nf" 'org-roam-node-find
     "nt" 'org-roam-buffer-toggle
   )
-  )
+)
 
 (use-package ob-mermaid
+  :straight t)
+
+(use-package ob-latex-as-png
   :straight t)
 
 (org-babel-do-load-languages
@@ -305,7 +323,9 @@
 	 (haskell . t)
    (mermaid . t)
 	 (java . t)
+   (latex . t)
 	 ))
+(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
 
 (use-package marginalia
 	:config
@@ -322,10 +342,16 @@
 
 (use-package undo-fu
   :init
-  (setq undo-limit 67108864) ; 64mb.
-  (setq undo-strong-limit 100663296) ; 96mb.
-  (setq undo-outer-limit 1006632960) ; 960mb.
-  )
+  (setq undo-limit 67108864)
+  (setq undo-strong-limit 100663296)
+  (setq undo-outer-limit 1006632960))
+
+(use-package undo-fu-session
+  :ensure t
+  :custom
+  (undo-fu-session-directory "~/.backups")
+  :init
+  (undo-fu-session-global-mode))
 
 (use-package vundo)
 
@@ -351,12 +377,11 @@
 	)
 
 ;; Use nix to install as don't want CMake
-;; (use-package vterm
-;; 	:ensure t)
-;
-;; (use-package vterm-toggle
-;;   :ensure t
-;;   )
+(use-package vterm
+	:ensure t)
+
+(use-package vterm-toggle
+  :ensure t)
 
 (keymap-global-set "s-<return>" 'vterm-toggle)
 (keymap-global-set "s-c" 'calc)
@@ -529,6 +554,8 @@
                                        "<$" "<$>" "<+" "<+>" "<>"
                                        "<<" "<<<" "</" "</>" "^="
                                        "%%" "'''" "\"\"\"" ))
+
+  (ligature-set-ligatures 'org-mode '("=>"))
   ;; Enables ligature checks globally in all buffers. You can also do it
   ;; per mode with `ligature-mode'.
   (global-ligature-mode t))
