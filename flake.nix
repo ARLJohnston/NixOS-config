@@ -30,10 +30,15 @@
       url = "github:lilyinstarlight/nixos-cosmic";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    dwl-source = {
+      url = "git+https://codeberg.org/dwl/dwl";
+      flake = false;
+    };
   };
 
   outputs =
-    { self, nixpkgs, home-manager, emacs-overlay, nixos-cosmic, ... }@inputs:
+    { self, nixpkgs, home-manager, emacs-overlay, dwl-source, ... }@inputs:
     let
       system = "x86_64-linux";
 
@@ -43,16 +48,9 @@
         thinkpad = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit inputs system; };
           modules = [
-            {
-              nix.settings = {
-                substituters = [ "https://cosmic.cachix.org/" ];
-                trusted-public-keys = [
-                  "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE="
-                ];
-              };
-            }
             ./nixos/configuration.nix
-            nixos-cosmic.nixosModules.default
+            ./nixos/desktop.nix
+            #./modules
           ];
         };
       };
