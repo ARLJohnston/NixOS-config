@@ -28,7 +28,14 @@ in {
     };
   };
 
+  #https://github.com/target/lorri/issues/284
   services.lorri.enable = true;
+
+  systemd.user.services.lorri = {
+    Service.ExecStart = lib.mkForce "${pkgs.lorri}/bin/lorri -v daemon";
+    Install.WantedBy = [ "default.target" ];
+  };
+  systemd.user.startServices = true;
 
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [ "spotify" ];
@@ -104,6 +111,7 @@ in {
       repeat_rate: 25,
       )
     '';
+
   };
 
   programs.home-manager.enable = true;
