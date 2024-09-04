@@ -6,6 +6,7 @@
 !*.lock
 !*.org
 !*.el
+!*h
 !LICENSE
 !.github
 !.github/*
@@ -15,3 +16,11 @@
 !nixos/*.nix
 !nixos/*.el
 !nixos/home_modules/*.nix
+
+
+!modules
+!modules/default.nix
+!modules/desktop
+!modules/desktop/*.nix
+!modules/editors
+!modules/editors/*.nix

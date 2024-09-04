@@ -8,22 +8,21 @@
 
     ./hardware-configuration.nix
     ./audio.nix
-    ./desktop.nix
     ./power.nix
     ./boot.nix
+    ./k3s.nix
   ];
 
   time.timeZone = "Europe/Dublin";
   console.keyMap = "uk";
 
-  environment.sessionVariables = {
-    XKB_DEFAULT_LAYOUT = "gb";
-    XKB_DEFAULT_OPTIONS = "ctrl:nocaps";
-    LANG = lib.mkForce "en_GB.UTF-8";
-  };
+  # environment.sessionVariables = {
+  #   XKB_DEFAULT_LAYOUT = "gb";
+  #   XKB_DEFAULT_OPTIONS = "";
+  #   LANG = lib.mkForce "en_GB.UTF-8";
+  # };
 
   #Lock-screen and hinge
-  security.pam.services.swaylock = { };
   services.logind = {
     extraConfig = "HandlePowerKey=suspend";
     lidSwitch = "suspend";
@@ -58,6 +57,10 @@
   networking = {
     hostId = "0f6ac2e8";
     networkmanager.enable = true;
+
+    extraHosts = ''
+      192.168.0.77 hello
+    '';
   };
 
   environment.systemPackages = with pkgs; [
@@ -85,22 +88,16 @@
   # users.extraGroups.vboxusers.members = [ "alistair" ];
   # virtualisation.virtualbox.host.enableExtensionPack = true;
 
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
-  };
+  # virtualisation.docker = {
+  #   enable = true;
+  #   rootless = {
+  #     enable = true;
+  #     setSocketVariable = true;
+  #   };
+  # };
 
   nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [
-      "discord"
-      "spotify"
-      "steam"
-      "steam-original"
-      "steam-run"
-    ];
-
-  programs.steam = { enable = true; };
+    builtins.elem (lib.getName pkg) [ "discord" "spotify" ];
 
   users.users.alistair = {
     isNormalUser = true;
@@ -109,20 +106,18 @@
     packages = with pkgs; [
       (retroarch.override { cores = with libretro; [ desmume ]; })
       calibre
-      direnv
       discord
       feh
       jellyfin-ffmpeg
-      firefox
       gh
       gnumake
       openconnect
-      teams-for-linux
       thunderbird
       unzip
       whatsapp-for-linux
       keepassxc
       godot_4
+      mermaid-cli
     ];
   };
 

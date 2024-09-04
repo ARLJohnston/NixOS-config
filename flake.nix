@@ -26,19 +26,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-cosmic = {
-      url = "github:lilyinstarlight/nixos-cosmic";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     dwl-source = {
       url = "git+https://codeberg.org/dwl/dwl";
       flake = false;
     };
   };
 
-  outputs =
-    { self, nixpkgs, home-manager, emacs-overlay, dwl-source, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, emacs-overlay, ... }@inputs:
     let
       system = "x86_64-linux";
 

@@ -1,6 +1,6 @@
 { pkgs, ... }: {
   services.auto-cpufreq = {
-    enable = false;
+    enable = true;
     settings = {
       battery = {
         governor = "powersave";
@@ -16,7 +16,7 @@
   services.thermald.enable = true;
 
   services.tlp = {
-    enable = false;
+    enable = true;
     settings = {
       RUNTIME_PM_ON_AC = "on";
       RUNTIME_PM_ON_BAT = "auto";
