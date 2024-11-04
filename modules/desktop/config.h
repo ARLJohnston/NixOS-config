@@ -8,6 +8,8 @@
 static const int sloppyfocus               = 1;  /* focus follows mouse */
 static const int bypass_surface_visibility = 0;  /* 1 means idle inhibitors will disable idle tracking even if it's surface isn't visible  */
 static const unsigned int borderpx         = 1;  /* border pixel of windows */
+static const int showbar                   = 1; /* 0 means no bar */
+static const int topbar                    = 1; /* 0 means bottom bar */
 static const float rootcolor[]             = COLOR(0x222222ff);
 static const float bordercolor[]           = COLOR(0x444444ff);
 static const float focuscolor[]            = COLOR(0x005577ff);
@@ -20,6 +22,13 @@ static const float fullscreen_bg[]         = {0.1f, 0.1f, 0.1f, 1.0f}; /* You ca
 
 /* logging */
 static int log_level = WLR_ERROR;
+
+/* Autostart */
+static const char *const autostart[] = {
+	"emacs", "--fg-daemon", NULL,
+	"wbg", "/home/alistair/wallpaper.jpg", NULL,
+        NULL /* terminate */
+};
 
 /* NOTE: ALWAYS keep a rule declared even if you don't use rules (e.g leave at least one example) */
 static const Rule rules[] = {
@@ -121,33 +130,44 @@ static const enum libinput_config_tap_button_map button_map = LIBINPUT_CONFIG_TA
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static const char *termcmd[] = { "foot", NULL };
-static const char *menucmd[] = { "wmenu-run", NULL };
-static const char *browsercmd[] = { "librewolf", NULL };
-static const char *mutecmd[] = { "pamixer", "--toggle-mute", NULL };
-static const char *volumeraisecmd[] = { "pamixer", "pamixer -i 5", NULL };
-static const char *volumelowercmd[] = { "pamixer", "pamixer -d 5", NULL };
-static const char *brightnessraisecmd[] = { "brightnessctl", "set", "+5\%", NULL };
-static const char *brightnesslowercmd[] = { "brightnessctl", "set", "5\%-", NULL };
+static const char *term_cmd[] = { "foot", NULL };
+static const char *menu_cmd[] = { "wofi", "--show", "drun", NULL };
+static const char *emacs_menu_cmd[] = { "emacsclient", "-r", "-e", "'(app-launcher-run-app)'", NULL };
+static const char *browser_cmd[] = { "librewolf", NULL };
+static const char *mute_cmd[] = { "pamixer", "--toggle-mute", NULL };
+static const char *volume_raise_cmd[] = { "pamixer", "-i", "5", NULL };
+static const char *volume_lower_cmd[] = { "pamixer", "-d", "5", NULL };
+static const char *brightness_raise_cmd[] = { "brightnessctl", "set", "+5\%", NULL };
+static const char *brightness_lower_cmd[] = { "brightnessctl", "set", "5\%-", NULL };
+static const char *fine_brightness_raise_cmd[] = { "brightnessctl", "set", "+1\%", NULL };
+static const char *fine_brightness_lower_cmd[] = { "brightnessctl", "set", "1\%-", NULL };
+
+static const char *screenshot_cmd[] = { "grim", "-g", "\"$(slurp)\"", "-|", "wl-copy", NULL };
+static const char *save_screenshot_cmd[] = { "grim", "-g", "\"$(slurp)\"", "~/Pictures/$(date +\%Y-\%m-\%d_\%H-\%m-\%s).png", NULL };
 
 static const Key keys[] = {
 	/* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
 	/* modifier                  key                            function          argument */
-	{ MODKEY,                    XKB_KEY_d,                     spawn,            {.v = menucmd} },
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Return,                spawn,            {.v = termcmd} },
-	{ MODKEY,                    XKB_KEY_w,                     spawn,            {.v = browsercmd} },
+	{ MODKEY,                    XKB_KEY_d,                     spawn,            {.v = menu_cmd} },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_D,                     spawn,            {.v = emacs_menu_cmd} },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Return,                spawn,            {.v = term_cmd} },
+	{ MODKEY,                    XKB_KEY_w,                     spawn,            {.v = browser_cmd} },
 	{ MODKEY,                    XKB_KEY_j,                     focusstack,       {.i = +1} },
 	{ MODKEY,                    XKB_KEY_k,                     focusstack,       {.i = -1} },
-	{ MODKEY,                    XKB_KEY_i,                     incnmaster,       {.i = +1} },
-	{ MODKEY,                    XKB_KEY_d,                     incnmaster,       {.i = -1} },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_K,                     incnmaster,       {.i = +1} },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_J,                     incnmaster,       {.i = -1} },
 	{ MODKEY,                    XKB_KEY_h,                     setmfact,         {.f = -0.05f} },
 	{ MODKEY,                    XKB_KEY_l,                     setmfact,         {.f = +0.05f} },
 	{ MODKEY,                    XKB_KEY_Return,                zoom,             {0} },
-	{ 0,                         XKB_KEY_XF86AudioMute,         spawn,            {.v = mutecmd} },
-	{ 0,                         XKB_KEY_XF86AudioRaiseVolume,  spawn,            {.v = volumeraisecmd} },
-	{ 0,                         XKB_KEY_XF86AudioLowerVolume,  spawn,            {.v = volumelowercmd} },
-	{ 0,                         XKB_KEY_XF86MonBrightnessUp,   spawn,            {.v = brightnessraisecmd} },
-	{ 0,                         XKB_KEY_XF86MonBrightnessDown, spawn,            {.v = brightnesslowercmd} },
+	{ 0,                         XKB_KEY_Print,                 spawn,          {.v = screenshot_cmd} },
+	{ WLR_MODIFIER_SHIFT,        XKB_KEY_Print,                 spawn,          {.v = save_screenshot_cmd} },
+	{ 0,                         XKB_KEY_XF86AudioMute,         spawn,            {.v = mute_cmd} },
+	{ 0,                         XKB_KEY_XF86AudioRaiseVolume,  spawn,            {.v = volume_raise_cmd} },
+	{ 0,                         XKB_KEY_XF86AudioLowerVolume,  spawn,            {.v = volume_lower_cmd} },
+	{ 0,                         XKB_KEY_XF86MonBrightnessUp,   spawn,            {.v = brightness_raise_cmd} },
+	{ 0,                         XKB_KEY_XF86MonBrightnessDown, spawn,            {.v = brightness_lower_cmd} },
+	{ MODKEY,                    XKB_KEY_XF86MonBrightnessUp,   spawn,            {.v = fine_brightness_raise_cmd} },
+	{ MODKEY,                    XKB_KEY_XF86MonBrightnessDown, spawn,            {.v = fine_brightness_lower_cmd} },
 	{ MODKEY,                    XKB_KEY_Tab,                   view,             {0} },
 	{ MODKEY,                    XKB_KEY_q,                     killclient,       {0} },
 	{ MODKEY,                    XKB_KEY_t,                     setlayout,        {.v = &layouts[0]} },

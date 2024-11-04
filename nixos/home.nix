@@ -28,15 +28,6 @@ in {
     };
   };
 
-  #https://github.com/target/lorri/issues/284
-  services.lorri.enable = true;
-
-  systemd.user.services.lorri = {
-    Service.ExecStart = lib.mkForce "${pkgs.lorri}/bin/lorri -v daemon";
-    Install.WantedBy = [ "default.target" ];
-  };
-  systemd.user.startServices = true;
-
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [ "spotify" ];
 
@@ -58,26 +49,12 @@ in {
     ./home_modules/librewolf.nix
   ];
 
-  # programs.spicetify =
-  #   let spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.system};
-  #   in {
-  #     enable = true;
-  #     enabledExtensions = with spicePkgs.extensions; [
-  #       adblock
-  #       hidePodcasts
-  #       shuffle # shuffle+ (special characters are sanitized out of extension names)
-  #     ];
-  #     theme = spicePkgs.themes.catppuccin;
-  #     colorScheme = "mocha";
-  #   };
-
   home.packages = with pkgs; [
+    brightnessctl
     lsd # better ls
+    pamixer
     tree
     zoxide
-    pamixer
-    brightnessctl
-    direnv
   ];
 
   programs.git = {
@@ -86,18 +63,12 @@ in {
     userEmail = "github@arljohnston.com";
 
     extraConfig = {
-      core = { editor = "emacsclient"; };
+      core = { editor = "emacsclient -c"; };
       init = { defaultBranch = "main"; };
     };
   };
 
-  # home.sessionVariables = {
-  #   NIXOS_OZONE_WL = 1;
-  #   MOZ_ENABLE_WAYLAND = 1;
-  #   XDG_SESSION_TYPE = "wayland";
-  #   GDK_BACKEND = "wayland,x11";
-  #   QT_QPA_PLATFORM = "wayland";
-  # };
+  services.swayidle = { enable = true; };
 
   home.file = {
     ".config/cosmic/com.system76.CosmicComp/v1/xkb_config".text = ''

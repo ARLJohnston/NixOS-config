@@ -19,6 +19,8 @@
 
 
 !modules
+!modules/*
+!modules/test/*.nix
 !modules/default.nix
 !modules/desktop
 !modules/desktop/*.nix

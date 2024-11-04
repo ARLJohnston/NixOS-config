@@ -1,37 +1,34 @@
 { pkgs, inputs, config, ... }:
 let
   my-emacs = with pkgs;
-    (emacsPackagesFor emacs-pgtk).emacsWithPackages
-    (epkgs: with epkgs; [ vterm pdf-tools ]);
+    (emacsPackagesFor emacs-pgtk).emacsWithPackages (epkgs:
+      with epkgs; [
+        vterm
+        pdf-tools
+        org-alert
+        jinx
+        treesit-grammars.with-all-grammars
+      ]);
   override = final: prev: { NIX_CFLAGS_COMPILE = [ "-O3" "-march=native" ]; };
 
-  # my-emacs = (pkgs.emacsWithPackagesFromUsePackage {
-  #   package = pkgs.emacs-pgtk;
-  #   config = ./init.el;
-  #   alwaysEnsure = false;
+  python-packages = ps: with ps; [ grpcio-tools ];
 
-  #   extraEmacsPackages = epkgs: with epkgs; [ pdf-tools vterm ];
-  #   override = final: prev: { NIX_CFLAGS_COMPILE = [ "-O3" "-march=native" ]; };
-  # });
 in {
 
   home.packages = with pkgs; [
-    texliveMedium
-    tree-sitter
-    python3
+    texliveFull
+    texlivePackages.standalone
+    (python3.withPackages python-packages)
 
     my-emacs
+    (hunspellWithDicts [ hunspellDicts.en_GB-ize ])
   ];
 
-  home.file = { ".emacs".source = ./init.el; };
+  home.file = {
+    ".emacs.d/init.el".source = ./init.el;
 
-  services = {
-    emacs = {
-      enable = true;
-      defaultEditor = true;
-      package = my-emacs;
-      socketActivation.enable = true;
-    };
+    ".config/enchant/hunspell/".source =
+      "${pkgs.hunspellDicts.en_GB-ize}/share/hunspell/";
   };
 
   nixpkgs.overlays = [ (import inputs.emacs-overlay) ];

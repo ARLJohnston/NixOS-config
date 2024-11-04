@@ -16,6 +16,7 @@
           sidebery
           gruvbox-dark-theme
           consent-o-matic
+          ublacklist
         ];
 
         search = {

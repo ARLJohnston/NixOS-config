@@ -7,22 +7,17 @@
     inputs.home-manager.nixosModules.home-manager
 
     ./hardware-configuration.nix
-    ./audio.nix
-    ./power.nix
-    ./boot.nix
-    ./k3s.nix
   ];
+
+  msci.enable = true;
+  pipewire.enable = true;
+  boot-config.enable = true;
+  powersave.enable = true;
+  dwl-desktop.enable = true;
 
   time.timeZone = "Europe/Dublin";
   console.keyMap = "uk";
 
-  # environment.sessionVariables = {
-  #   XKB_DEFAULT_LAYOUT = "gb";
-  #   XKB_DEFAULT_OPTIONS = "";
-  #   LANG = lib.mkForce "en_GB.UTF-8";
-  # };
-
-  #Lock-screen and hinge
   services.logind = {
     extraConfig = "HandlePowerKey=suspend";
     lidSwitch = "suspend";
@@ -65,59 +60,52 @@
 
   environment.systemPackages = with pkgs; [
     curl
-    acpi
-    home-manager
+    direnv
+    libnotify
     pcmanfm
+    rpi-imager
     vlc
     zfs
     zfs-prune-snapshots
   ];
 
-  fonts.packages = with pkgs; [
-    cascadia-code
-    fira-code-nerdfont
-    emacs-all-the-icons-fonts
-  ];
+  fonts = {
+    packages = with pkgs; [
+      emacs-all-the-icons-fonts
+      iosevka-comfy.comfy-motion-fixed
+    ];
 
-  fonts.fontconfig = {
-    enable = true;
-    defaultFonts = { monospace = [ "Cascadia Code" ]; };
+    fontconfig = {
+      defaultFonts = {
+        serif = [ "MonoLisa Nerd Font" ];
+        sansSerif = [ "MonoLisa Nerd Font" ];
+        monospace = [ "MonoLisa Nerd Font" ];
+      };
+    };
   };
-  #virtualisation.virtualbox.host.enable = true;
-  #virtualisation.virtualbox.guest.enable = true;
-  # users.extraGroups.vboxusers.members = [ "alistair" ];
-  # virtualisation.virtualbox.host.enableExtensionPack = true;
-
-  # virtualisation.docker = {
-  #   enable = true;
-  #   rootless = {
-  #     enable = true;
-  #     setSocketVariable = true;
-  #   };
-  # };
 
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [ "discord" "spotify" ];
 
   users.users.alistair = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" "networkmanager" "docker" ];
+    extraGroups = [ "wheel" "video" "networkmanager" ];
 
     packages = with pkgs; [
-      (retroarch.override { cores = with libretro; [ desmume ]; })
+      (retroarch.override { cores = with libretro; [ mgba ]; })
       calibre
       discord
       feh
-      jellyfin-ffmpeg
       gh
       gnumake
+      godot_4
+      keepassxc
+      mermaid-cli
       openconnect
+      teams-for-linux
       thunderbird
       unzip
       whatsapp-for-linux
-      keepassxc
-      godot_4
-      mermaid-cli
     ];
   };
 
@@ -144,6 +132,10 @@
         };
         "Camera" = {
           path = "/home/alistair/Camera";
+          devices = [ "Pixel3XL" ];
+        };
+        "Org" = {
+          path = "/home/alistair/org";
           devices = [ "Pixel3XL" ];
         };
       };
@@ -175,6 +167,11 @@
       domain = true;
       userServices = true;
     };
+  };
+
+  services.lorri = {
+    enable = true;
+    #enableNotifications = true;
   };
 
   hardware.graphics.enable = true;
