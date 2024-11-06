@@ -97,7 +97,6 @@
    :keymaps 'dired-mode-map
    "h" 'dired-up-directory
    "l" 'dired-find-file
-   "C-o" 'casual-dired-tmenu
    "q" 'kill-this-buffer
    )
 
@@ -164,9 +163,6 @@
   :diminish
 	)
 
-(use-package casual-dired
-	:straight (:type git :host github :repo "kickingvegas/casual-dired")
-	)
 
 (unless (package-installed-p 'editorconfig)
 	(package-install 'editorconfig))
@@ -178,6 +174,11 @@
 (use-package dockerfile-ts-mode
 	:ensure nil
   :mode ((rx "Dockerfile" string-end) . dockerfile-ts-mode))
+
+(use-package yaml-ts-mode
+	:ensure nil
+  :mode ((rx "yaml" string-end) . yaml-ts-mode)
+((rx "yml" string-end) . yaml-ts-mode))
 
 (use-package imenu-list
 	;; :config
@@ -392,6 +393,10 @@
 	:ensure t
 	)
 
+;; https://emacs.stackexchange.com/a/46377
+(with-eval-after-load 'evil-maps
+	(define-key evil-motion-state-map (kbd "RET") nil))
+
 (use-package evil-collection
 	:config
 	(evil-collection-init)
@@ -465,32 +470,11 @@
 																									 #'eglot-completion-at-point #'yasnippet-capf)))))
   :after yasnippet)
 
-(use-package eldoc
-	:init
-	(global-eldoc-mode)
-  :diminish eldoc-mode)
-
-(use-package yaml-pro
-  :ensure t
-  :mode ("\\.yml\\'" . yaml-pro-ts-mode)
-	)
-
-(use-package orderless
-  :ensure t
-  :custom
-  (completion-styles '(flex orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
-
-(use-package terraform-mode
-  :ensure t)
-
 (use-package docker
   :ensure t
   :general
   (rune/leader-keys
 		"d" 'docker))
-
-(use-package go-dlv)
 
 (use-package transient
   :ensure t
@@ -562,25 +546,6 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
-(use-package indent-bars
-  :straight ( :host github
-							:repo "jdtsmith/indent-bars")
-  :hook (prog-mode . indent-bars-mode)
-  :custom
-  (indent-bars-prefer-character nil)
-	(default-tab-width 2)
-	(tab-width 2)
-  (indent-bars-width-frac 0.1))
-
-(use-package combobulate
-  :custom
-  ;; You can customize Combobulate's key prefix here.
-  ;; Note that you may have to restart Emacs for this to take effect!
-  (combobulate-key-prefix "C-c o")
-  :hook ((prog-mode . combobulate-mode))
-  ;; Amend this to the directory where you keep Combobulate's source
-  ;; code.
-  :load-path ("~/.emacs.d/combobulate"))
 
 (defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
@@ -628,17 +593,12 @@
 
 (elpaca-wait)
 
-
-
 (use-package p4-16-mode)
 
 (use-package parrot
 	:general
 	(rune/leader-keys
 		"pr" 'parrot-rotate-next-word-at-point))
-
-
-
 
 (use-package ligature
   :config
@@ -680,15 +640,37 @@
 (use-package haskell-mode
   :mode ("\\.hs?$" . haskell-mode))
 
-
-(use-package yaml-ts-mode
-	:elpaca nil
-  :mode ((rx "yaml" string-end) . yaml-ts-mode)
-((rx "yml" string-end) . yaml-ts-mode))
-
 (use-package protobuf-ts-mode
   :mode ("\\.proto?$" . protobuf-ts-mode))
 
 (use-package go-mode
   :mode ("\\.go?$" . go-mode)
 	:hook (before-save . gofmt-before-save))
+
+(use-package indent-bars
+  :ensure (indent-bars :host github :repo "jdtsmith/indent-bars")
+  :hook (prog-mode . indent-bars-mode)
+  :custom
+	;; (indent-bars-treesit-support t)
+  (indent-bars-prefer-character nil)
+	(default-tab-width 2)
+	(tab-width 2)
+  (indent-bars-width-frac 0.1))
+
+(use-package magit-todos
+  :after magit
+	:hook (elpaca-after-init . magit-todos-mode)
+	:diminish)
+
+(use-package eldoc
+	:hook (elpaca-after-init . global-eldoc-mode)
+  :diminish eldoc-mode)
+
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(flex orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+
+(use-package terraform-mode
+  :ensure t)
