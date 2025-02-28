@@ -1,517 +1,21 @@
-;;Install Straight.el
-(defvar bootstrap-version)
-(let ((bootstrap-file
-			 (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-			(bootstrap-version 6))
-	(unless (file-exists-p bootstrap-file)
-		(with-current-buffer
-				(url-retrieve-synchronously
-				 "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-				 'silent 'inhibit-cookies)
-			(goto-char (point-max))
-			(eval-print-last-sexp)))
-	(load bootstrap-file nil 'nomessage))
+;; Do as early as possible to avoid flashbang
+(load-theme 'modus-vivendi-tinted t)
 
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
+(defun my/nixos-p ()
+  "Return t if operating system is NixOS, nil otherwise."
+  (string-match-p "NixOS" (shell-command-to-string "uname -v")))
 
-(use-package org
-	:custom
-	(org-return-follows-link t))
+(defun my/nixos/get-emacs-build-date ()
+  "Return NixOS Emacs build date."
+  (string-match "--prefix.*emacs.*\\([[:digit:]]\\{8\\}\\)" system-configuration-options)
+  (string-to-number (match-string 1 system-configuration-options)))
 
-(use-package general
-  :config
-  (general-evil-setup t)
-  (general-auto-unbind-keys)
-
-  (general-create-definer rune/leader-keys
-		:states '(normal visual motion emacs insert)
-		:keymaps 'override
-		:prefix "SPC"
-		:global-prefix "C-SPC")
-  :ensure t
-  :demand t)
-
-(use-package emacs
-	:custom
-	(native-comp-speed 3)
-	(ring-bell-function 'ignore)
-	(initial-scratch-message 'nil)
-	(read-extended-command-predicate #'command-completion-default-include-p)
-	(scroll-step 1)
-	(scroll-margin 4)
-	(display-line-numbers-type 'relative)
-	(default-tab-width 2)
-	(warning-minimum-level :error)
-  (default-frame-alist '((undecorated . t)))
-  (text-mode-ispell-word-completion nil)
-	:init
-	(tool-bar-mode -1)
-	(menu-bar-mode -1)
-	(scroll-bar-mode -1)
-	(global-display-line-numbers-mode 1)
-	(global-auto-revert-mode 1)
-  (save-place-mode 1)
-  (global-auto-revert-mode 1)
-  (recentf-mode)
-	(display-battery-mode)
-  (setq global-auto-revert-non-file-buffers t)
-	;;(electric-indent-mode -1)
-	(setq backup-directory-alist '(("." . "~/.backups"))
-				backup-by-copying t    ; Don't delink hardlinks
-				version-control t      ; Use version numbers on backups
-				delete-old-versions t  ; Automatically delete excess backups
-				kept-new-versions 20   ; how many of the newest versions to keep
-				kept-old-versions 5    ; and how many of the old
-				)
-
-	(winner-mode 1)
-	(global-visual-line-mode)
-
-	:bind
-	("C-c h" . winner-undo)
-	("C-c l" . winner-redo)
-	("C-c c" . comment-or-uncomment-region)
-	("C-c /" . comment-or-uncomment-region)
-
-  :general
-  (rune/leader-keys
-		"bk" 'kill-current-buffer
-		"bm" 'buffer-menu
-		"bi" 'recentf
-		"r" 'switch-to-buffer
-		"s" 'project-switch-to-buffer
-		"a" 'project-async-shell-command
-		"w" (general-simulate-key "C-w")
-		"oa" 'org-agenda
-		"SPC" 'find-file
-		"ni" 'org-roam-node-insert
-		"ou" 'org-roam-ui-open
-		"co" 'org-clock-out
-		"cl" 'org-clock-in-last
-		"or" #'(lambda () (interactive) (find-file "~/org/main.org"))
-		)
-
-  (general-define-key
-   :states '(normal)
-   :keymaps 'dired-mode-map
-   "h" 'dired-up-directory
-   "l" 'dired-find-file
-   "q" 'kill-this-buffer
-   )
-
-  (general-define-key
-   :states '(visual)
-   "u" 'undo
-   "r" 'undo-fu-only-redo
-   )
-  :diminish visual-line-mode
-  :after general
-	)
-
-(use-package avy
-  :general
-  (general-define-key
-   :states '(insert normal motion visual)
-   "C-f" 'avy-goto-char
-   "C-t" 'avy-goto-char-timer)
-
-  (general-define-key
-   :states '(normal motion visual)
-   "s" 'avy-goto-char)
-
-  (rune/leader-keys
-		"f" 'avy-goto-char)
-  )
-
-(use-package doom-themes
-	)
-;;   :ensure t
-;;   :config
-;;   (load-theme 'doom-monokai-ristretto t))
-
-(use-package ef-themes
-	:config (load-theme 'ef-autumn t))
-
-(use-package whitespace
-  :init
-  (global-whitespace-mode)
-  :custom
-  (whitespace-display-mappings
-   '(
-	   (tab-mark ?\t [#x00B7 #x00B7])
-	   (space-mark 32 [183] [46])
-	   (space-mark 160 [164] [95])
-     (newline-mark 10 [36 10])
-     )
-   )
-  (whitespace-style
-   '(
-     empty
-     face
-     newline
-     newline-mark
-     space-mark
-     spaces
-     tab-mark
-     tabs
-     trailing
-     )
-   )
-  :hook (before-save . whitespace-cleanup)
-  :ensure nil
-  :diminish
-	)
+;; Run this before the elpaca.el is loaded. Before the installer in your init.el is a good spot.
+(when (my/nixos-p) (setq elpaca-core-date (list (my/nixos/get-emacs-build-date))))
 
 
-(unless (package-installed-p 'editorconfig)
-	(package-install 'editorconfig))
-
-(use-package diminish
-	:ensure t
-	)
-
-(use-package dockerfile-ts-mode
-	:ensure nil
-  :mode ((rx "Dockerfile" string-end) . dockerfile-ts-mode))
-
-(use-package yaml-ts-mode
-	:ensure nil
-  :mode ((rx "yaml" string-end) . yaml-ts-mode)
-((rx "yml" string-end) . yaml-ts-mode))
-
-(use-package imenu-list
-	;; :config
-	;; (imenu-list-focus-after-activation t)
-  ;; :general
-  ;; (rune/leader-keys
-	;; "si" 'imenu-list-smart-toggle
-  ;; )
-	)
-
-;;Better autocomplete
-(use-package vertico
-	:custom
-	(vertico-count 13)
-	(vertico-resize t)
-	(vertico-cycle nil)
-	(read-file-name-completion-ignore-case t)
-	(read-buffer-completion-ignore-case t)
-	(completion-ignore-case t)
-	:config
-	(vertico-mode)
-	(savehist-mode)
-	:ensure t
-	)
-
-(use-package corfu
-  :ensure t
-	:custom
-	(corfu-cycle t)
-	(corfu-auto t)
-	;; (corfu-separator ?\s)
-  (corfu-auto-prefix 1)
-  (corfu-auto-delay 0.2)
-  (corfu-popupinfo-delay '(0.4 . 0.2))
-  (corfu-echo-documentation t)
-	;; https://github.com/minad/corfu/issues/108
-	(corfu-on-exact-match nil)
-  :init (global-corfu-mode)
-  :hook (global-corfu-mode . corfu-popupinfo-mode)
-	:diminish corfu-mode)
-
-(use-package cape
-  :bind ("C-c p" . cape-prefix-map)
-  :init
-  (setq cape-dict-file "~/config/emacs/dictionary.dic")
-
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  ;;(add-hook 'completion-at-point-functions #'cape-dict)
-	(add-hook 'completion-at-point-functions #'org-roam-complete-everywhere)
-	(add-hook 'completion-at-point-functions #'org-roam-complete-link-at-point)
-	)
-
-(use-package yasnippet-capf
-  :ensure t
-  :after cape)
-
-(use-package kind-icon
-  :after corfu
-  :custom
-  (kind-icon-default-face 'corfu-default)
-  :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
-(use-package elfeed
-	:custom
-  (shr-max-image-proportion 0.5)
-	(browse-url-browser-function 'eww-browse-url)
-  (elfeed-search-filter "")
-	(elfeed-feeds
-	 '(("https://xeiaso.net/blog.rss" code)
-     ("https://fly.io/blog/feed.xml" code)
-		 ("https://servo.org/blog/feed.xml" misc)
-     ("https://protesilaos.com/codelog.xml" emacs)
-		 ("https://karthinks.com/index.xml" emacs)
-     ("https://blog.system76.com/rss.xml" misc)
-		 ("https://ferd.ca/feed.rss" misc)
-		 ("https://threedots.tech/index.xml" code)
-		 ("https://samoa.dcs.gla.ac.uk/events/rest/Feed/rss/123" research)
-		 ("https://xkcd.com/rss.xml" misc)))
-  :general
-  (rune/leader-keys
-		"e" #'(lambda () (interactive) (elfeed-update) (elfeed))
-		)
-  (rune/leader-keys
-		:keymaps 'eww-mode-map
-		"y" 'eww-copy-page-url
-		)
-	:defer t
-	)
-
-(use-package nix-mode
-  :init
-  (add-hook 'nix-mode-hook
-						(lambda () (add-hook 'before-save-hook 'nix-format-buffer nil t)))
-	:defer t
-	)
-
-(use-package yasnippet
-	:init
-	(yas-global-mode 1)
-  (yas-minor-mode-on)
-	:bind
-	("M-s" . yas-insert-snippet)
-	:custom
-	(yas-snippet-dirs '("~/config/emacs/snippets"))
-	:ensure t
-	:diminish yas-minor-mode
-	)
-
-(use-package org-roam-ui)
-(use-package org-roam-bibtex
-  :straight t
-  :after org-roam)
-
-;; (use-package org-auto-tangle
-;; 	:ensure t
-;; 	:diminish org-auto-tangle-mode
-;; 	:hook
-;; 	(org-mode . org-auto-tangle-mode)
-;; 	)
-
-(use-package org-roam
-  :ensure t
-  :custom
-  (org-roam-directory "~/org")
-  (org-roam-complete-everywhere t)
-  (org-agenda-files (list "~/org/"))
-  (org-roam-capture-templates
-   '(
-     ("d" "default" plain
-      "%?"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)
-
-		 ("m" "mermaid" plain
-      "%?"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n #+STARTUP: inlineimages\n\n #+begin_src mermaid :file ${slug}.png\n flowchart TD\n A[Christmas] -->|Get money| B(Go shopping)\n B --> C{Let me think}\n C -->|One| D[Laptop]\n C -->|Two| E[iPhone]\n C -->|Three| F[fa:fa-car Car]\n #+end_src")
-      :unnarrowed t)
-     )
-   )
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert))
-  :config
-  (org-roam-setup)
-  :general
-  (rune/leader-keys
-		:keymaps 'org-mode-map
-		"ci" 'org-clock-in
-		"cu" 'org-clock-update-time-maybe
-		"nf" 'org-roam-node-find
-		"nt" 'org-roam-buffer-toggle
-		)
-	)
-
-(use-package ob-mermaid
-  :straight t)
-
-(use-package ob-latex-as-png
-  :straight t)
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-	 (emacs-lisp . t)
-	 (haskell . t)
-   (mermaid . t)
-	 (java . t)
-   (latex . t)
-	 ))
-(add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
-
-(use-package marginalia
-	:config
-	(marginalia-mode 1)
-	:ensure t
-	)
-
-(use-package all-the-icons-completion
-	:init
-	(all-the-icons-completion-mode)
-	:hook
-	(marginalia-mode-hook . all-the-icons-completion-marginalia-setup)
-	)
-
-(use-package undo-fu
-  :init
-  (setq undo-limit 67108864)
-  (setq undo-strong-limit 100663296)
-  (setq undo-outer-limit 1006632960))
-
-(use-package undo-fu-session
-  :ensure t
-  :custom
-  (undo-fu-session-directory "~/.backups")
-  :init
-  (undo-fu-session-global-mode))
-
-(use-package vundo)
-
-(use-package evil
-	:custom
-	(evil-want-integration t)
-	(evil-want-keybinding nil)
-  (evil-want-C-u-scroll t)
-  (evil-undo-system 'undo-fu)
-	:config
-	(evil-mode 1)
-	:hook
-	(after-init . evil-mode)
-	:ensure t
-	)
-
-;; https://emacs.stackexchange.com/a/46377
-(with-eval-after-load 'evil-maps
-	(define-key evil-motion-state-map (kbd "RET") nil))
-
-(use-package evil-collection
-	:config
-	(evil-collection-init)
-	:ensure t
-	:diminish evil-collection-unimpaired-mode
-  :after evil
-	)
-
-;; Use nix to install as don't want CMake
-(use-package vterm
-	:ensure t)
-
-(use-package vterm-toggle
-  :ensure t)
-
-(keymap-global-set "s-<return>" 'vterm-toggle)
-(keymap-global-set "s-c" 'calc)
-(keymap-global-set "C-c C-c" 'project-compile)
-
-(use-package magit
-	:ensure t
-  :general
-  (rune/leader-keys
-		"m" 'magit-status)
-	)
-
-(use-package pdf-tools
-	:init
-	(pdf-loader-install)
-	(add-hook 'pdf-view-mode-hook #'(lambda () (display-line-numbers-mode -1)))
-	(add-hook 'pdf-view-mode-hook 'pdf-view-midnight-minor-mode)
-	(add-hook 'pdf-mode-hook #'(lambda () (interactive) (display-line-numbers-mode -1)))
-	:defer t
-	)
-
-
-(use-package envrc
-  :ensure t
-	:hook (after-init . envrc-global-mode))
-
-(use-package eglot
-	:hook
-  (prog-mode . eglot-ensure)
-  (yaml-ts-mode . eglot-ensure)
-  :general
-  (rune/leader-keys
-		:keymaps 'prog-mode-map
-		"lr" 'eglot-rename
-		)
-	:bind
-	("M-RET" . eglot-code-actions)
-	("M-r" . eglot-rename)
-  :custom
-  (gc-cons-threshold 100000000)
-  (read-process-output-max (* 1024 1024)) ;; 1mb
-  (eglot-autoshutdown t) ; shutdown after closing the last managed buffer
-  (eglot-sync-connect 0) ; async, do not block
-  :config
-  (setq-default eglot-workspace-configuration
-								'((:gopls .
-													(
-													 (staticcheck . t)
-													 (completeUnimported          . t)
-													 (usePlaceholders             . t)
-													 (expandWorkspaceToModule     . t)
-													 ))))
-  :demand t
-  :hook (eglot-managed-mode . (lambda ()
-																(setq-local completion-at-point-functions
-																						(list (cape-capf-super
-																									 #'eglot-completion-at-point #'yasnippet-capf)))))
-  :after yasnippet)
-
-(use-package docker
-  :ensure t
-  :general
-  (rune/leader-keys
-		"d" 'docker))
-
-(use-package transient
-  :ensure t
-  :init
-  (transient-define-prefix go-transient ()
-    [
-     ("t" "Tidy"
-      (lambda ()
-        (interactive)
-        (async-shell-command "go mod tidy")))
-
-     ("v" "Vet"
-      (lambda ()
-				(interactive)
-				(async-shell-command "go vet")))
-
-     ("d" "Delve"
-      (lambda ()
-				(interactive)
-				(dlv)))
-
-     ("D" "Doc"
-      (lambda ()
-				(interactive)
-				(godoc)))
-
-     ("s" "Package Search"
-      (lambda ()
-				(interactive)
-				(other-window-prefix)
-	      (eww (concat '"https://pkg.go.dev/search?q=" (read-string "Enter Package Name:"))))
-      )
-     ])
-  :general
-  (rune/leader-keys
-		"g" #'(lambda () (interactive) (go-transient))))
-
+;; Set *very* short proced format when nix (which has very long path names for processes)
+(when (my/nixos-p) (setq proced-format-alist '((short user pid tree pcpu pmem start time (comm)))))
 
 (add-to-list 'default-frame-alist
              '(font . "MonoLisa Nerd Font-10"))
@@ -521,31 +25,6 @@
                     ;; :height 200
                     :weight 'normal
                     :width 'condensed)
-
-(use-package org-alert
-  :ensure t
-	:custom
-	(alert-default-style 'libnotify)
-  (org-alert-interval 300)
-  (org-alert-notify-cutoff 10)
-  (org-alert-notify-after-event-cutoff 10))
-(org-alert-enable)
-
-(use-package jinx
-	:init
-	(global-jinx-mode)
-  :general
-  (general-define-key
-   "C-;" 'jinx-correct-nearest)
-	:diminish)
-
-(use-package treesit-auto
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
-
 
 (defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
@@ -586,19 +65,210 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
-;; Install use-package support
 (elpaca elpaca-use-package
-  ;; Enable use-package :ensure support for Elpaca
   (elpaca-use-package-mode))
 
 (elpaca-wait)
 
-(use-package p4-16-mode)
+(use-package general
+  :config
+  (general-auto-unbind-keys)
+  (general-evil-setup t)
+  (general-create-definer rune/leader-keys
+    :states '(normal visual motion emacs insert)
+    :keymaps 'override
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+  :ensure t
+  :demand t)
 
-(use-package parrot
-	:general
-	(rune/leader-keys
-		"pr" 'parrot-rotate-next-word-at-point))
+(use-package diminish)
+
+(elpaca-wait)
+
+(use-package evil
+  :custom
+  (evil-want-integration t)
+  (evil-want-keybinding nil)
+  (evil-want-C-u-scroll t)
+  (evil-undo-function 'undo-only)
+  (evil-redo-function 'undo-redo)
+  (evil-undo-system 'undo-redo)
+  :config
+  (evil-mode 1)
+  :ensure t)
+
+(use-package evil-collection
+  :config
+  (evil-collection-init)
+  :ensure t
+  :diminish evil-collection-unimpaired-mode
+  :after evil)
+
+(use-package emacs
+  :custom
+  (native-comp-speed 3)
+  (ring-bell-function 'ignore)
+  (initial-scratch-message 'nil)
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  (scroll-step 1)
+  (scroll-margin 4)
+  (display-line-numbers-type 'relative)
+  (default-tab-width 2)
+  (warning-minimum-level :error)
+  (default-frame-alist '((undecorated . t)))
+  (text-mode-ispell-word-completion nil)
+  (global-auto-revert-non-file-buffers t)
+  :init
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (global-display-line-numbers-mode 1)
+  (global-auto-revert-mode 1)
+  (save-place-mode 1)
+  (global-auto-revert-mode 1)
+  (fido-vertical-mode 1)
+  (savehist-mode)
+  (recentf-mode)
+  (display-battery-mode)
+  ;;(electric-indent-mode -1)
+  (setq backup-directory-alist '(("." . "~/.backups"))
+        backup-by-copying t    ; Don't delink hardlinks
+        version-control t      ; Use version numbers on backups
+        delete-old-versions t
+        kept-new-versions 20
+        kept-old-versions 5)
+  (setq auto-save-file-name-transforms '((".*" "~/.autosaves/" t)))
+  (winner-mode 1)
+  (global-visual-line-mode)
+  (setq custom-file "~/.emacs-custom.el") ;; Apply and save customisations to writable file
+  :bind
+  ("C-c h" . winner-undo)
+  ("C-c l" . winner-redo)
+  ("C-c c" . comment-or-uncomment-region)
+  ("C-c /" . comment-or-uncomment-region)
+  ("C-x s" . save-buffer)
+  ("C-x S" . save-some-buffers)
+  :general
+  (rune/leader-keys
+    "bk" 'kill-current-buffer
+    "bm" 'buffer-menu
+    "bi" 'recentf
+    "SPC" 'find-file
+    "r" 'switch-to-buffer
+    ;; God mode bindings
+    "w" (general-simulate-key "C-w")
+    "x" (general-simulate-key "C-x")
+    "c" (general-simulate-key "C-c")
+    )
+
+  (general-define-key
+   :states '(normal)
+   :keymaps 'dired-mode-map
+   "h" 'dired-up-directory
+   "l" 'dired-find-file
+   "q" 'kill-this-buffer
+   )
+
+  (general-define-key
+   :states '(insert normal motion visual)
+   "C-p" 'yank-from-kill-ring)
+
+  :diminish visual-line-mode
+  :ensure nil)
+
+(use-package transient
+  :ensure t)
+
+(use-package magit
+  :after transient
+  :general
+  (rune/leader-keys
+    "m" 'magit)
+  :ensure t)
+
+(use-package magit-todos
+  :hook (elpaca-after-init . magit-todos-mode)
+  :after magit
+  :ensure t)
+
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package pdf-tools
+  :init
+  (pdf-loader-install)
+  (add-hook 'pdf-view-mode-hook #'(lambda () (display-line-numbers-mode -1)))
+  (add-hook 'pdf-view-mode-hook 'pdf-view-midnight-minor-mode)
+  (add-hook 'pdf-mode-hook #'(lambda () (interactive) (display-line-numbers-mode -1)))
+  :ensure t)
+
+(use-package eglot
+  :bind
+  ("M-RET" . eglot-code-actions)
+  ("M-r" . eglot-rename)
+  :custom
+  (gc-cons-threshold 100000000)
+  (read-process-output-max (* 1024 1024)) ;; 1mb
+  (eglot-autoshutdown t) ; shutdown after closing the last managed buffer
+  (eglot-sync-connect 0) ; async, do not block, useful for when nix is actively installing lsp server
+  (flymake-show-diagnostics-at-end-of-line 1)
+  :config
+  (setq-default eglot-workspace-configuration
+                '((:gopls .
+                          (
+                           (staticcheck . t)
+                           (completeUnimported          . t)
+                           (usePlaceholders             . t)
+                           (expandWorkspaceToModule     . t)
+                           ))))
+  :hook
+  (prog-mode . eglot-ensure)
+  (yaml-mode . eglot-ensure)
+  (before-save . eglot-format)
+  (eglot-managed-mode . (lambda ()
+                                (setq-local completion-at-point-functions
+                                            (list (cape-capf-super
+                                                   #'eglot-completion-at-point #'yasnippet-capf)))))
+  :ensure nil)
+
+(use-package whitespace
+  :init
+  (global-whitespace-mode)
+  :custom
+  (whitespace-display-mappings
+   '(
+     (tab-mark ?\t [62 62])
+     (space-mark 32 [183] [46])
+     (space-mark 160 [164] [95])
+     (newline-mark 10 [36 10])
+     )
+   )
+  (whitespace-style
+   '(
+     empty
+     face
+     newline
+     newline-mark
+     space-mark
+     spaces
+     tab-mark
+     tabs
+     trailing
+     )
+   )
+  :hook (before-save . whitespace-cleanup)
+  :ensure nil
+  :diminish whitespace-mode)
+
+(use-package combobulate
+  :elpaca (combobulate
+     :host github
+     :repo "mickeynp/combobulate")
+  :custom (combobulate-key-prefix "C-c o")
+  :hook (prog-mode . combobulate-mode)
+  :ensure t)
 
 (use-package ligature
   :config
@@ -609,7 +279,7 @@
                                        "==" "===" "==>" "=>" "=>>"
                                        "=<<" "=/" ">-" ">->" ">="
                                        ">=>" "<-" "<--" "<->" "<-<"
-                                       "<!--" "<|" "<||" "<|||"
+                                       "<!--" "<|" "<||" "<|||" "|>"
                                        "<|>" "<=" "<==" "<==>" "<=>"
                                        "<=<" "<<-" "<<=" "<~" "<~>"
                                        "<~~" "~-" "~@" "~=" "~>"
@@ -627,44 +297,67 @@
                                        "<$" "<$>" "<+" "<+>" "<>"
                                        "<<" "<<<" "</" "</>" "^="
                                        "%%" "'''" "\"\"\"" ))
-
   (ligature-set-ligatures 'org-mode '("=>"))
-  ;; Enables ligature checks globally in all buffers. You can also do it
-  ;; per mode with `ligature-mode'.
-  (global-ligature-mode t))
+  (global-ligature-mode t)
+  :ensure t)
 
-(use-package hl-todo
-	:hook (elpaca-after-init . global-hl-todo-mode)
-	:diminish)
+(use-package dap-mode
+  :hook (elpaca-after-init . dap-ui-mode)
+  :init
+  (require 'dap-dlv-go)
+  (add-hook 'dap-stopped-hook
+          (lambda (arg) (call-interactively #'dap-hydra)))
+  :ensure t)
 
-(use-package haskell-mode
-  :mode ("\\.hs?$" . haskell-mode))
-
-(use-package protobuf-ts-mode
-  :mode ("\\.proto?$" . protobuf-ts-mode))
-
-(use-package go-mode
-  :mode ("\\.go?$" . go-mode)
-	:hook (before-save . gofmt-before-save))
-
-(use-package indent-bars
-  :ensure (indent-bars :host github :repo "jdtsmith/indent-bars")
-  :hook (prog-mode . indent-bars-mode)
+(use-package treesit-auto
   :custom
-	;; (indent-bars-treesit-support t)
-  (indent-bars-prefer-character nil)
-	(default-tab-width 2)
-	(tab-width 2)
-  (indent-bars-width-frac 0.1))
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode)
+  :ensure t)
 
-(use-package magit-todos
-  :after magit
-	:hook (elpaca-after-init . magit-todos-mode)
-	:diminish)
+(use-package corfu
+  :ensure t
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 1)
+  (corfu-auto-delay 0.2)
+  (corfu-popupinfo-delay '(0.4 . 0.2))
+  (corfu-echo-documentation t)
+  ;; https://github.com/minad/corfu/issues/108
+  (corfu-on-exact-match nil)
+  :init (global-corfu-mode)
+  :hook (global-corfu-mode . corfu-popupinfo-mode)
+  :diminish corfu-mode)
 
-(use-package eldoc
-	:hook (elpaca-after-init . global-eldoc-mode)
-  :diminish eldoc-mode)
+(use-package marginalia
+  :config
+  (marginalia-mode 1)
+  :ensure t)
+
+(use-package cape
+  :init
+  (setq cape-dict-file "~/config/emacs/dictionary.dic")
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  :ensure t)
+
+(use-package yasnippet-capf
+  :ensure t
+  :after cape)
+
+(use-package yasnippet
+  :init
+  (yas-global-mode 1)
+  (yas-minor-mode-on)
+  :bind
+  ("M-s" . yas-insert-snippet)
+  :custom
+  (yas-snippet-dirs '("~/config/emacs/snippets"))
+  :ensure t
+  :diminish yas-minor-mode)
 
 (use-package orderless
   :ensure t
@@ -672,5 +365,53 @@
   (completion-styles '(flex orderless basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
-(use-package terraform-mode
+(use-package jinx
+  :init
+  (global-jinx-mode)
+  :general
+  (general-define-key
+   "C-;" 'jinx-correct-nearest)
+  :diminish jinx-mode
   :ensure t)
+
+(use-package mw-thesaurus
+  :ensure t
+  :bind
+  ("C-'" . mw-thesaurus-lookup-dwim))
+
+(use-package docker
+  :ensure t
+  :general
+  (rune/leader-keys
+    "d" 'docker))
+
+;; Modes not in treesit-auto
+(use-package nix-ts-mode
+  :mode "\\.nix\\'"
+  :ensure t)
+
+(use-package auctex
+  :ensure t
+  :custom
+  (TeX-auto-save t)
+  (TeX-parse-self t)
+  (TeX-master nil)
+  ;; to use pdfview with auctex
+  (TeX-view-program-selection '((output-pdf "pdf-tools"))
+                              TeX-source-correlate-start-server t)
+  (TeX-view-program-list '(("pdf-tools" "TeX-pdf-tools-sync-view")))
+  (TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+  :hook
+  (LaTeX-mode . (lambda ()
+                  (setq TeX-PDF-mode t)
+                  (setq TeX-source-correlate-method 'synctex)
+                  (setq TeX-source-correlate-start-server t))))
+
+(use-package envrc
+  :ensure t
+  :hook (elpaca-after-init . envrc-global-mode))
+
+(elpaca-wait)
+(with-eval-after-load 'evil-maps
+  (define-key evil-motion-state-map (kbd "RET") nil)
+  (define-key evil-motion-state-map (kbd "TAB") nil))
