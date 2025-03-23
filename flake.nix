@@ -16,13 +16,10 @@
 
     nix-colors = { url = "github:misterio77/nix-colors"; };
 
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+
     firefox-addons = {
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    spicetify-nix = {
-      url = "github:Gerg-L/spicetify-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -32,7 +29,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, emacs-overlay, ... }@inputs:
+  outputs = { nixpkgs, home-manager, nixos-wsl, ... }@inputs:
     let
       system = "x86_64-linux";
 
@@ -40,8 +37,26 @@
     in {
       nixosConfigurations = {
         thinkpad = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs system; };
-          modules = [ ./nixos/configuration.nix ./modules ];
+          specialArgs = {
+            inherit inputs system;
+            overlays = import ./overlays;
+          };
+          modules = [ ./nixos/configuration.nix ./modules];
+        };
+        windows = nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs system;
+            overlays = import ./overlays;
+          };
+          modules = [
+          nixos-wsl.nixosModules.default
+          {
+            system.stateVersion = "25.05";
+            wsl.enable = true;
+          }
+            ./modules
+	          ./hosts/wsl.nix
+          ];
         };
       };
 

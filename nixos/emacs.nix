@@ -1,7 +1,7 @@
-{ pkgs, inputs, config, ... }:
+{ pkgs, inputs, ... }:
 let
   my-emacs = with pkgs;
-    (emacsPackagesFor emacs-pgtk).emacsWithPackages (epkgs:
+    (emacsPackagesFor emacs-pgtk).emacs.pkgs.withPackages (epkgs:
       with epkgs; [
         vterm
         pdf-tools
@@ -9,19 +9,16 @@ let
         jinx
         treesit-grammars.with-all-grammars
       ]);
-  override = final: prev: { NIX_CFLAGS_COMPILE = [ "-O3" "-march=native" ]; };
-
-  python-packages = ps: with ps; [ grpcio-tools ];
-
 in {
 
   home.packages = with pkgs; [
     texliveFull
     texlivePackages.standalone
-    (python3.withPackages python-packages)
+    nixd
 
     my-emacs
-    (hunspellWithDicts [ hunspellDicts.en_GB-ize ])
+    python312
+    (hunspellWithDicts [ hunspellDicts.en_GB-ise ])
   ];
 
   home.file = {
