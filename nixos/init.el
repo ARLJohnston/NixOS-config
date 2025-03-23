@@ -222,11 +222,17 @@
                            (completeUnimported          . t)
                            (usePlaceholders             . t)
                            (expandWorkspaceToModule     . t)
-                           ))))
+                           )))
+                '(:yaml ( :format (:enable t)
+                        :validate t
+                        :hover t
+                        :completion t
+                        :schemas (https://json.schemastore.org/yamllint.json ["/*.yml"])
+                        :schemaStore (:enable t))))
   :hook
   (prog-mode . eglot-ensure)
   (yaml-mode . eglot-ensure)
-  (before-save . eglot-format)
+  (before-save . eglot-format-buffer)
   (eglot-managed-mode . (lambda ()
                                 (setq-local completion-at-point-functions
                                             (list (cape-capf-super
@@ -261,14 +267,6 @@
   :hook (before-save . whitespace-cleanup)
   :ensure nil
   :diminish whitespace-mode)
-
-(use-package combobulate
-  :elpaca (combobulate
-     :host github
-     :repo "mickeynp/combobulate")
-  :custom (combobulate-key-prefix "C-c o")
-  :hook (prog-mode . combobulate-mode)
-  :ensure t)
 
 (use-package ligature
   :config
@@ -410,6 +408,17 @@
 (use-package envrc
   :ensure t
   :hook (elpaca-after-init . envrc-global-mode))
+
+(use-package eat
+  :ensure t)
+
+(use-package disproject
+  :ensure t
+  ;; :config
+  ;; (disproject-shell-command #'eat-project)
+  :general
+  (rune/leader-keys
+    "p" 'disproject-dispatch))
 
 (elpaca-wait)
 (with-eval-after-load 'evil-maps
